@@ -1,0 +1,1 @@
+elm make elmTest.elm --output=index.html
