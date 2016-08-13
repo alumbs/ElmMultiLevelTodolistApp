@@ -1,3 +1,8 @@
+var _user$project$Main$margin15Style = _elm_lang$html$Html_Attributes$style(
+	_elm_lang$core$Native_List.fromArray(
+		[
+			{ctor: '_Tuple2', _0: 'margin-left', _1: '15px'}
+		]));
 var _user$project$Main$myStyle = _elm_lang$html$Html_Attributes$style(
 	_elm_lang$core$Native_List.fromArray(
 		[
@@ -239,13 +244,7 @@ var _user$project$Main$displaySingleTodo = function (todo) {
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
-			[
-				_elm_lang$html$Html_Attributes$style(
-				_elm_lang$core$Native_List.fromArray(
-					[
-						{ctor: '_Tuple2', _0: 'margin-left', _1: '15px;'}
-					]))
-			]),
+			[_user$project$Main$margin15Style]),
 		_elm_lang$core$Native_List.fromArray(
 			[
 				A2(
@@ -264,13 +263,7 @@ var _user$project$Main$displaySingleTodo = function (todo) {
 				A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html_Attributes$style(
-						_elm_lang$core$Native_List.fromArray(
-							[
-								{ctor: '_Tuple2', _0: 'margin-left', _1: '15px;'}
-							]))
-					]),
+					[_user$project$Main$margin15Style]),
 				_elm_lang$core$Native_List.fromArray(
 					[
 						_user$project$Main$displayTodoList(todo.children)

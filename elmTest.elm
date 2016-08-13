@@ -252,10 +252,16 @@ myStyle =
    ("width", "100%")
  ]
 
+margin15Style : Attribute Msg
+margin15Style = 
+  style[
+    ("margin-left", "15px")
+  ]
+
 --Display single todo
 displaySingleTodo : Todo -> Html Msg
 displaySingleTodo todo =
-  div[ style [("margin-left", "15px;")] ]
+  div[margin15Style] --style [("margin-left", "15px;")] ]
   [
     input[myStyle 
     -- , placeholder "New todo"
@@ -266,7 +272,7 @@ displaySingleTodo todo =
     [
       -- text todo.description
     ]
-    , div [ style [("margin-left", "15px;")] ]
+    , div [ margin15Style] --style [("margin-left", "15px;")] ]
     [
       displayTodoList todo.children
     ]
