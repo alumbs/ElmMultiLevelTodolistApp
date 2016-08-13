@@ -7754,16 +7754,56 @@ var _user$project$Main$emptyModel = {
 	uid: 0
 };
 var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Main$emptyModel, _1: _elm_lang$core$Platform_Cmd$none};
-var _user$project$Main$updateTodochildDesc = F3(
-	function (_p0, todoId, newDesc) {
+var _user$project$Main$addTodoChildToChildrenList = F2(
+	function (_p0, newTodoId) {
 		var _p1 = _p0;
+		return _user$project$Main$TodoChildren(
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				_p1._0,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						{
+						children: _user$project$Main$TodoChildren(
+							_elm_lang$core$Native_List.fromArray(
+								[])),
+						description: '',
+						id: newTodoId
+					}
+					])));
+	});
+var _user$project$Main$addNewTodoToChildrenList = F3(
+	function (_p2, todoId, newTodoId) {
+		var _p3 = _p2;
+		var createChildTodo = function (todo) {
+			return _elm_lang$core$Native_Utils.eq(todo.id, todoId) ? _elm_lang$core$Native_Utils.update(
+				todo,
+				{
+					children: A2(_user$project$Main$addTodoChildToChildrenList, todo.children, newTodoId)
+				}) : todo;
+		};
+		return _user$project$Main$TodoChildren(
+			A2(_elm_lang$core$List$map, createChildTodo, _p3._0));
+	});
+var _user$project$Main$createNewChildForTodo = F2(
+	function (model, todoId) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				uid: model.uid + 1,
+				entries: A3(_user$project$Main$addNewTodoToChildrenList, model.entries, todoId, model.uid + 1)
+			});
+	});
+var _user$project$Main$updateTodochildDesc = F3(
+	function (_p4, todoId, newDesc) {
+		var _p5 = _p4;
 		var updateTodoDesc = function (todo) {
 			return _elm_lang$core$Native_Utils.eq(todo.id, todoId) ? _elm_lang$core$Native_Utils.update(
 				todo,
 				{description: newDesc}) : todo;
 		};
 		return _user$project$Main$TodoChildren(
-			A2(_elm_lang$core$List$map, updateTodoDesc, _p1._0));
+			A2(_elm_lang$core$List$map, updateTodoDesc, _p5._0));
 	});
 var _user$project$Main$updateTodoModelDesc = F3(
 	function (model, id, desc) {
@@ -7773,13 +7813,13 @@ var _user$project$Main$updateTodoModelDesc = F3(
 				entries: A3(_user$project$Main$updateTodochildDesc, model.entries, id, desc)
 			});
 	});
-var _user$project$Main$addTodoChild = F3(
-	function (_p2, newTodoText, newTodoVal) {
-		var _p3 = _p2;
+var _user$project$Main$addToTodoChild = F3(
+	function (_p6, newTodoText, newTodoVal) {
+		var _p7 = _p6;
 		return _user$project$Main$TodoChildren(
 			A2(
 				_elm_lang$core$Basics_ops['++'],
-				_p3._0,
+				_p7._0,
 				_elm_lang$core$Native_List.fromArray(
 					[
 						{
@@ -7797,13 +7837,13 @@ var _user$project$Main$addTodo = function (model) {
 		{
 			uid: model.uid + 1,
 			field: '',
-			entries: _elm_lang$core$String$isEmpty(model.field) ? model.entries : A3(_user$project$Main$addTodoChild, model.entries, model.field, model.uid)
+			entries: _elm_lang$core$String$isEmpty(model.field) ? model.entries : A3(_user$project$Main$addToTodoChild, model.entries, model.field, model.uid)
 		});
 };
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p4 = msg;
-		switch (_p4.ctor) {
+		var _p8 = msg;
+		switch (_p8.ctor) {
 			case 'NoOp':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
@@ -7819,7 +7859,7 @@ var _user$project$Main$update = F2(
 			case 'UpdateTodo':
 				return {
 					ctor: '_Tuple2',
-					_0: A3(_user$project$Main$updateTodoModelDesc, model, _p4._0, _p4._1),
+					_0: A3(_user$project$Main$updateTodoModelDesc, model, _p8._0, _p8._1),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'UpdateField':
@@ -7827,15 +7867,15 @@ var _user$project$Main$update = F2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
 						model,
-						{field: _p4._0}),
+						{field: _p8._0}),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			default:
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					model,
-					_elm_lang$core$Native_List.fromArray(
-						[]));
+				return {
+					ctor: '_Tuple2',
+					_0: A2(_user$project$Main$createNewChildForTodo, model, _p8._0),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 		}
 	});
 var _user$project$Main$AddChildTodo = function (a) {
@@ -7848,48 +7888,6 @@ var _user$project$Main$UpdateTodo = F2(
 	function (a, b) {
 		return {ctor: 'UpdateTodo', _0: a, _1: b};
 	});
-var _user$project$Main$displaySingleTodo = function (todo) {
-	return A2(
-		_elm_lang$html$Html$div,
-		_elm_lang$core$Native_List.fromArray(
-			[]),
-		_elm_lang$core$Native_List.fromArray(
-			[
-				A2(
-				_elm_lang$html$Html$input,
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_user$project$Main$myStyle,
-						_elm_lang$html$Html_Events$onInput(
-						_user$project$Main$UpdateTodo(todo.id)),
-						_elm_lang$html$Html_Attributes$value(todo.description)
-					]),
-				_elm_lang$core$Native_List.fromArray(
-					[])),
-				A2(
-				_elm_lang$html$Html$div,
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html_Attributes$style(
-						_elm_lang$core$Native_List.fromArray(
-							[
-								{ctor: '_Tuple2', _0: 'margin-left', _1: '15px;'}
-							]))
-					]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_user$project$Main$displayTodoList(todo.children)
-					]))
-			]));
-};
-var _user$project$Main$displayTodoList = function (_p5) {
-	var _p6 = _p5;
-	return A2(
-		_elm_lang$html$Html$div,
-		_elm_lang$core$Native_List.fromArray(
-			[]),
-		A2(_elm_lang$core$List$map, _user$project$Main$displaySingleTodo, _p6._0));
-};
 var _user$project$Main$Add = {ctor: 'Add'};
 var _user$project$Main$NoOp = {ctor: 'NoOp'};
 var _user$project$Main$onEnter = function (msg) {
@@ -7955,6 +7953,56 @@ var _user$project$Main$showRootView = function (str) {
 						_elm_lang$html$Html$text('Add New Todo')
 					]))
 			]));
+};
+var _user$project$Main$displaySingleTodo = function (todo) {
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_elm_lang$html$Html_Attributes$style(
+				_elm_lang$core$Native_List.fromArray(
+					[
+						{ctor: '_Tuple2', _0: 'margin-left', _1: '15px;'}
+					]))
+			]),
+		_elm_lang$core$Native_List.fromArray(
+			[
+				A2(
+				_elm_lang$html$Html$input,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_user$project$Main$myStyle,
+						_user$project$Main$onEnter(
+						_user$project$Main$AddChildTodo(todo.id)),
+						_elm_lang$html$Html_Events$onInput(
+						_user$project$Main$UpdateTodo(todo.id)),
+						_elm_lang$html$Html_Attributes$value(todo.description)
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[])),
+				A2(
+				_elm_lang$html$Html$div,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Attributes$style(
+						_elm_lang$core$Native_List.fromArray(
+							[
+								{ctor: '_Tuple2', _0: 'margin-left', _1: '15px;'}
+							]))
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_user$project$Main$displayTodoList(todo.children)
+					]))
+			]));
+};
+var _user$project$Main$displayTodoList = function (_p9) {
+	var _p10 = _p9;
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[]),
+		A2(_elm_lang$core$List$map, _user$project$Main$displaySingleTodo, _p10._0));
 };
 var _user$project$Main$view = function (model) {
 	return A2(

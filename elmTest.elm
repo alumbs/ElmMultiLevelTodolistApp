@@ -72,7 +72,7 @@ type Msg
   | Add
   | UpdateTodo Int String
   | UpdateField String
-  | AddChildTodo Todo
+  | AddChildTodo Int
   -- | NewFace Int
 
 
@@ -97,20 +97,70 @@ update msg model =
    UpdateField str  ->
     { model | field = str } ! []
 
-   AddChildTodo todo ->
-    model ! []
-    -- let
-    --   addNewChildTodo str parentTodo =
-    --     model.uid++ parentTodo.children ++ [newEntry str model.uid]
-    -- in
-    --   addNewChildTodo model.field todo
+   AddChildTodo todoId ->
+    ((createNewChildForTodo model todoId), Cmd.none)
 
-    -- {model.entries Todo.id | name = str}
-    --   ! []
-    --  (model, Random.generate NewFace (Random.int 1 6))
+    
 
-    --NewFace newFace ->
-    --  (Model newFace, Cmd.none)
+--FUNCTIONS
+createNewChildForTodo : Model -> Int -> Model
+createNewChildForTodo model todoId =
+  {
+    model 
+    | uid= model.uid + 1
+    , entries = (addNewTodoToChildrenList model.entries todoId (model.uid + 1) )
+  }
+  --  let
+  --   createChildTodo todo newTodoId =
+  --     if todo.id == todoId then 
+  --       { 
+  --         todo 
+  --         | children = 
+  --           [{ id = newTodoId 
+  --             , description = "new child"
+  --             , children = (TodoChildren [])}]
+  --       } 
+  --     else todo
+  --  in
+  --   {model 
+  --    | uid= model.uid + 1
+  --    , entries = List.map createChildTodo model.entries model.uid++ 
+  --   }
+
+addNewTodoToChildrenList : TodoChildren -> Int -> Int -> TodoChildren
+addNewTodoToChildrenList (TodoChildren todoChild) todoId newTodoId =
+  let
+    createChildTodo todo =
+      if todo.id == todoId then 
+        { 
+          todo 
+          | children = addTodoChildToChildrenList todo.children newTodoId
+            -- TodoChildren (
+            --   [
+            --     { 
+            --       id = newTodoId 
+            --       , description = "new child"
+            --       , children = (TodoChildren [])
+            --     }
+            --   ])
+        } 
+      else todo
+   in
+    TodoChildren (List.map createChildTodo todoChild)
+
+addTodoChildToChildrenList : TodoChildren -> Int -> TodoChildren
+addTodoChildToChildrenList (TodoChildren todo) newTodoId =
+  -- {
+  --   todo ++ 
+  --   [
+  --     { 
+  --       id = newTodoId 
+  --       , description = "new child"
+  --       , children = (TodoChildren [])
+  --     }
+  --   ]
+  -- }
+  (TodoChildren (todo ++ [{children = (TodoChildren []), description = "", id = newTodoId}]))
 
 updateTodoModelDesc : Model -> Int -> String -> Model
 updateTodoModelDesc model id desc =
@@ -150,11 +200,11 @@ addTodo model =
         model.entries
       else
         --model.entries ++ [newEntry model.field model.uid]
-        addTodoChild model.entries model.field model.uid
+        addToTodoChild model.entries model.field model.uid
    }      
 
-addTodoChild : TodoChildren -> String -> Int -> TodoChildren
-addTodoChild (TodoChildren todoChild) newTodoText newTodoVal =
+addToTodoChild : TodoChildren -> String -> Int -> TodoChildren
+addToTodoChild (TodoChildren todoChild) newTodoText newTodoVal =
   (TodoChildren (todoChild ++ [{children = (TodoChildren []), description = newTodoText, id = newTodoVal}]))
 
 --Implement onEnter keyboard function
@@ -205,10 +255,11 @@ myStyle =
 --Display single todo
 displaySingleTodo : Todo -> Html Msg
 displaySingleTodo todo =
-  div[]
+  div[ style [("margin-left", "15px;")] ]
   [
     input[myStyle 
-    -- , onTodoEnter (AddChildTodo todo)
+    -- , placeholder "New todo"
+    , onEnter (AddChildTodo todo.id) --(AddChildTodo todo.children "" -1)
     , onInput (UpdateTodo todo.id)
     , value todo.description
     ]
