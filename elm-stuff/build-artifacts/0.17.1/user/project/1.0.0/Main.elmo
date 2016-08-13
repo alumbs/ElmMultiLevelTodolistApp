@@ -1,3 +1,8 @@
+var _user$project$Main$margin1emBotStyle = _elm_lang$html$Html_Attributes$style(
+	_elm_lang$core$Native_List.fromArray(
+		[
+			{ctor: '_Tuple2', _0: 'margin-bottom', _1: '1em'}
+		]));
 var _user$project$Main$margin15Style = _elm_lang$html$Html_Attributes$style(
 	_elm_lang$core$Native_List.fromArray(
 		[
@@ -123,7 +128,7 @@ var _user$project$Main$addTodo = function (model) {
 		{
 			uid: model.uid + 1,
 			field: '',
-			entries: _elm_lang$core$String$isEmpty(model.field) ? model.entries : A3(_user$project$Main$addToTodoChild, model.entries, model.field, model.uid)
+			entries: _elm_lang$core$String$isEmpty(model.field) ? model.entries : A3(_user$project$Main$addToTodoChild, model.entries, model.field, model.uid + 1)
 		});
 };
 var _user$project$Main$update = F2(
@@ -189,7 +194,7 @@ var _user$project$Main$showRootView = function (str) {
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
-			[]),
+			[_user$project$Main$margin1emBotStyle]),
 		_elm_lang$core$Native_List.fromArray(
 			[
 				A2(
@@ -244,7 +249,13 @@ var _user$project$Main$displaySingleTodo = function (todo) {
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
-			[_user$project$Main$margin15Style]),
+			[
+				_user$project$Main$margin15Style,
+				A2(
+				_elm_lang$html$Html_Attributes$attribute,
+				'id',
+				_elm_lang$core$Basics$toString(todo.id))
+			]),
 		_elm_lang$core$Native_List.fromArray(
 			[
 				A2(

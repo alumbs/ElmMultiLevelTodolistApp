@@ -200,7 +200,7 @@ addTodo model =
         model.entries
       else
         --model.entries ++ [newEntry model.field model.uid]
-        addToTodoChild model.entries model.field model.uid
+        addToTodoChild model.entries model.field (model.uid + 1)
    }      
 
 addToTodoChild : TodoChildren -> String -> Int -> TodoChildren
@@ -222,7 +222,7 @@ onEnter msg =
 --show the root view
 showRootView : String -> Html Msg
 showRootView str = 
-   div[]
+   div[margin1emBotStyle]
    [
       h1 [] [ text "Welcome to Todolist" ]
     , h2 [] [ text "Below are the list of todos" ]
@@ -258,10 +258,16 @@ margin15Style =
     ("margin-left", "15px")
   ]
 
+margin1emBotStyle : Attribute Msg
+margin1emBotStyle = 
+  style[
+    ("margin-bottom", "1em")
+  ]
+
 --Display single todo
 displaySingleTodo : Todo -> Html Msg
 displaySingleTodo todo =
-  div[margin15Style] --style [("margin-left", "15px;")] ]
+  div[margin15Style , attribute "id" (toString todo.id) ] --style [("margin-left", "15px;")] ]
   [
     input[myStyle 
     -- , placeholder "New todo"
@@ -277,31 +283,6 @@ displaySingleTodo todo =
       displayTodoList todo.children
     ]
   ]
-
-
--- displayChildTodoList : TodoList -> Html Msg
--- displayChildTodoList todoList =
---   div[]
---   (List.map displaySingleTodo todoList)
-
---Display single todo
--- displaySingleTodo : Todo -> Html Msg
--- displaySingleTodo todo =
---   div[]
---   [
---     input[myStyle 
---     -- , onTodoEnter (AddChildTodo todo)
---     , onInput (UpdateTodo todo.id)
---     , value todo.description
---     ]
---     [
---       -- text todo.description
---     ]
---     , div [ style ("margin-left", "15px;") ]
---     [
---       displayChildTodoList todo.children
---     ]
---   ]
 
 -- VIEW
 view : Model -> Html Msg
