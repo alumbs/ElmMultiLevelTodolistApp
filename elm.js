@@ -7919,27 +7919,32 @@ var _user$project$Todo$deleteTodoFromModel = F2(
 				entries: A2(_user$project$Todo$deleteTodoFromList, model.entries, todoToDeleteId)
 			});
 	});
-var _user$project$Todo$recursiveSetTodoChildrenToComplete = function (_p11) {
-	var _p12 = _p11;
-	var markTodoAsComplete = function (todo) {
-		return _user$project$Todo$setTodoToComplete(todo);
-	};
-	return _user$project$Todo$TodoChildren(
-		A2(_elm_lang$core$List$map, markTodoAsComplete, _p12._0));
-};
-var _user$project$Todo$setTodoToComplete = function (todo) {
-	return _elm_lang$core$Native_Utils.update(
-		todo,
-		{
-			completed: true,
-			children: _user$project$Todo$recursiveSetTodoChildrenToComplete(todo.children)
-		});
-};
-var _user$project$Todo$updateCompletedTodo = F2(
+var _user$project$Todo$recursiveSetTodoChildrenToComplete = F2(
+	function (_p11, isTodoCompleted) {
+		var _p12 = _p11;
+		var markTodoAsComplete = function (todo) {
+			return A2(_user$project$Todo$toggleSetTodoComplete, todo, isTodoCompleted);
+		};
+		return _user$project$Todo$TodoChildren(
+			A2(_elm_lang$core$List$map, markTodoAsComplete, _p12._0));
+	});
+var _user$project$Todo$toggleSetTodoComplete = F2(
+	function (todo, isTodoCompleted) {
+		return _elm_lang$core$Native_Utils.update(
+			todo,
+			{
+				completed: isTodoCompleted,
+				children: A2(_user$project$Todo$recursiveSetTodoChildrenToComplete, todo.children, isTodoCompleted)
+			});
+	});
+var _user$project$Todo$toggleCompletedTodoStatus = F2(
 	function (_p13, completedTodoId) {
 		var _p14 = _p13;
 		var markTodoAsComplete = function (todo) {
-			return _elm_lang$core$Native_Utils.eq(todo.id, completedTodoId) ? _user$project$Todo$setTodoToComplete(todo) : A2(_user$project$Todo$recursiveFindCompletedTodo, todo, completedTodoId);
+			return _elm_lang$core$Native_Utils.eq(todo.id, completedTodoId) ? A2(
+				_user$project$Todo$toggleSetTodoComplete,
+				todo,
+				_elm_lang$core$Basics$not(todo.completed)) : A2(_user$project$Todo$recursiveFindCompletedTodo, todo, completedTodoId);
 		};
 		return _user$project$Todo$TodoChildren(
 			A2(_elm_lang$core$List$map, markTodoAsComplete, _p14._0));
@@ -7949,15 +7954,15 @@ var _user$project$Todo$recursiveFindCompletedTodo = F2(
 		return _elm_lang$core$Native_Utils.update(
 			todo,
 			{
-				children: A2(_user$project$Todo$updateCompletedTodo, todo.children, completedTodoId)
+				children: A2(_user$project$Todo$toggleCompletedTodoStatus, todo.children, completedTodoId)
 			});
 	});
-var _user$project$Todo$markTodoAsCompleted = F2(
+var _user$project$Todo$toggleTodoCompletedField = F2(
 	function (model, todoCompletedId) {
 		return _elm_lang$core$Native_Utils.update(
 			model,
 			{
-				entries: A2(_user$project$Todo$updateCompletedTodo, model.entries, todoCompletedId)
+				entries: A2(_user$project$Todo$toggleCompletedTodoStatus, model.entries, todoCompletedId)
 			});
 	});
 var _user$project$Todo$addToTodoChild = F3(
@@ -8029,13 +8034,13 @@ var _user$project$Todo$update = F2(
 			default:
 				return {
 					ctor: '_Tuple2',
-					_0: A2(_user$project$Todo$markTodoAsCompleted, model, _p17._0),
+					_0: A2(_user$project$Todo$toggleTodoCompletedField, model, _p17._0),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 		}
 	});
-var _user$project$Todo$TodoCompleted = function (a) {
-	return {ctor: 'TodoCompleted', _0: a};
+var _user$project$Todo$ToggleTodoCompleted = function (a) {
+	return {ctor: 'ToggleTodoCompleted', _0: a};
 };
 var _user$project$Todo$DeleteTodo = function (a) {
 	return {ctor: 'DeleteTodo', _0: a};
@@ -8117,6 +8122,12 @@ var _user$project$Todo$showRootView = function (str) {
 			]));
 };
 var _user$project$Todo$displaySingleTodo = function (todo) {
+	var isChecked = function (todoCompleted) {
+		return todoCompleted;
+	};
+	var isCompleted = function (todoCompleted) {
+		return todoCompleted ? 'completed' : '';
+	};
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
@@ -8145,8 +8156,10 @@ var _user$project$Todo$displaySingleTodo = function (todo) {
 				_elm_lang$core$Native_List.fromArray(
 					[
 						_elm_lang$html$Html_Attributes$type$('checkbox'),
+						_elm_lang$html$Html_Attributes$checked(
+						isChecked(todo.completed)),
 						_elm_lang$html$Html_Events$onClick(
-						_user$project$Todo$TodoCompleted(todo.id))
+						_user$project$Todo$ToggleTodoCompleted(todo.id))
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[])),
@@ -8155,6 +8168,8 @@ var _user$project$Todo$displaySingleTodo = function (todo) {
 				_elm_lang$core$Native_List.fromArray(
 					[
 						_user$project$Todo$myStyle,
+						_elm_lang$html$Html_Attributes$class(
+						isCompleted(todo.completed)),
 						_elm_lang$html$Html_Attributes$placeholder('New todo'),
 						_user$project$Todo$onEnter(
 						_user$project$Todo$AddChildTodo(todo.id)),

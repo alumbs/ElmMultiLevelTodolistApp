@@ -70,7 +70,7 @@ type Msg
   | UpdateField String
   | AddChildTodo Int
   | DeleteTodo Int
-  | TodoCompleted Int
+  | ToggleTodoCompleted Int
   -- | NewFace Int
 
 
@@ -95,8 +95,8 @@ update msg model =
    DeleteTodo todoId ->
     ((deleteTodoFromModel model todoId), Cmd.none)
 
-   TodoCompleted todoId ->
-    ((markTodoAsCompleted model todoId), Cmd.none)
+   ToggleTodoCompleted todoId ->
+    ((toggleTodoCompletedField model todoId) , Cmd.none)
 
 
 --FUNCTIONS
@@ -204,19 +204,19 @@ recursiveDeleteTodo todo todoToDeleteId =
   }
 
 
-markTodoAsCompleted : Model -> Int -> Model
-markTodoAsCompleted model todoCompletedId =
+toggleTodoCompletedField : Model -> Int -> Model
+toggleTodoCompletedField model todoCompletedId =
   {
     model
-    | entries = (updateCompletedTodo model.entries todoCompletedId)
+    | entries = (toggleCompletedTodoStatus model.entries todoCompletedId)
   }
 
-updateCompletedTodo : TodoChildren -> Int -> TodoChildren
-updateCompletedTodo (TodoChildren todolist) completedTodoId =
+toggleCompletedTodoStatus : TodoChildren -> Int -> TodoChildren
+toggleCompletedTodoStatus (TodoChildren todolist) completedTodoId =
   let
     markTodoAsComplete todo =
       if todo.id == completedTodoId then
-        setTodoToComplete todo
+        toggleSetTodoComplete todo (not todo.completed)
       else
         recursiveFindCompletedTodo todo completedTodoId
   in
@@ -227,23 +227,22 @@ recursiveFindCompletedTodo : Todo -> Int -> Todo
 recursiveFindCompletedTodo todo completedTodoId =
   {
     todo
-    | children = updateCompletedTodo todo.children completedTodoId  
+    | children = toggleCompletedTodoStatus todo.children completedTodoId  
   }
 
-setTodoToComplete : Todo -> Todo
-setTodoToComplete todo =
+toggleSetTodoComplete : Todo -> Bool -> Todo
+toggleSetTodoComplete todo isTodoCompleted =
   {
     todo
-    | completed = True
-    , children = recursiveSetTodoChildrenToComplete todo.children
+    | completed = isTodoCompleted
+    , children = recursiveSetTodoChildrenToComplete todo.children isTodoCompleted
   }
 
-recursiveSetTodoChildrenToComplete : TodoChildren -> TodoChildren
-recursiveSetTodoChildrenToComplete (TodoChildren todolist) =
+recursiveSetTodoChildrenToComplete : TodoChildren -> Bool -> TodoChildren
+recursiveSetTodoChildrenToComplete (TodoChildren todolist) isTodoCompleted =
   let
     markTodoAsComplete todo =
-      setTodoToComplete todo
-        
+      toggleSetTodoComplete todo isTodoCompleted  
   in
     (TodoChildren (List.map markTodoAsComplete todolist))
     
@@ -340,35 +339,47 @@ displayTodoList (TodoChildren todoList) =
 --Display single todo
 displaySingleTodo : Todo -> Html Msg
 displaySingleTodo todo =
-  div[margin15Style , attribute "id" (toString todo.id) ] --style [("margin-left", "15px;")] ]
-  [ button
-      [
-        onClick (DeleteTodo todo.id) 
-      ]
-      [
-        text "delete"
-      ]
-    , input
-      [ 
-        type' "checkbox"
-        , onClick (TodoCompleted todo.id) 
-      ]
-      []
-    , input
-      [
-        myStyle 
-        , placeholder "New todo"
-        , onEnter (AddChildTodo todo.id)
-        , onInput (UpdateTodo todo.id)
-        , value todo.description
-      ]
-      []
-    , div 
-      [ margin15Style ] --style [("margin-left", "15px;")] ]
-      [
-        displayTodoList todo.children
-      ]
-  ]
+  let
+    isCompleted todoCompleted =
+      if todoCompleted then
+        "completed"
+      else
+        ""
+
+    isChecked todoCompleted =
+      todoCompleted
+  in
+    div[margin15Style , attribute "id" (toString todo.id) ] --style [("margin-left", "15px;")] ]
+    [ button
+        [
+          onClick (DeleteTodo todo.id) 
+        ]
+        [
+          text "delete"
+        ]
+      , input
+        [ 
+          type' "checkbox"
+          , checked (isChecked todo.completed)
+          , onClick (ToggleTodoCompleted todo.id) 
+        ]
+        []
+      , input
+        [
+          myStyle          
+          , class (isCompleted todo.completed) 
+          , placeholder "New todo"
+          , onEnter (AddChildTodo todo.id)
+          , onInput (UpdateTodo todo.id)
+          , value todo.description
+        ]
+        []
+      , div 
+        [ margin15Style ] --style [("margin-left", "15px;")] ]
+        [
+          displayTodoList todo.children
+        ]
+    ]
 
 -- VIEW
 view : Model -> Html Msg
