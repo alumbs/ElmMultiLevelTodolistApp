@@ -1,1 +1,1 @@
-elm make elmTest.elm --output=index.html
+elm-make elmTest.elm --output elm.js

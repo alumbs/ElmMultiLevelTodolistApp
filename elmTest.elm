@@ -1,3 +1,5 @@
+port module Todo exposing (..)
+
 import Html exposing (..)
 import Html.App as App
 import Html.Attributes exposing (..)
@@ -19,12 +21,13 @@ main =
 type alias Todo =
     { id: Int
     , description: String
+    , completed: Bool
     , children: TodoChildren
     }
 
 type TodoChildren = TodoChildren (List Todo)
 
-type AllTodoChildren = AllTodoChildren (Array.Array Todo)
+-- type AllTodoChildren = AllTodoChildren (Array.Array Todo)
 
 --Create a new Todo Entry
 newEntry: String -> Int -> Todo
@@ -32,6 +35,7 @@ newEntry str newId =
   {
       id = newId
     , description = str
+    , completed = False
     , children = (TodoChildren [])
   }
 
@@ -66,6 +70,7 @@ type Msg
   | UpdateField String
   | AddChildTodo Int
   | DeleteTodo Int
+  | TodoCompleted Int
   -- | NewFace Int
 
 
@@ -89,6 +94,9 @@ update msg model =
 
    DeleteTodo todoId ->
     ((deleteTodoFromModel model todoId), Cmd.none)
+
+   TodoCompleted todoId ->
+    ((markTodoAsCompleted model todoId), Cmd.none)
 
 
 --FUNCTIONS
@@ -196,6 +204,50 @@ recursiveDeleteTodo todo todoToDeleteId =
   }
 
 
+markTodoAsCompleted : Model -> Int -> Model
+markTodoAsCompleted model todoCompletedId =
+  {
+    model
+    | entries = (updateCompletedTodo model.entries todoCompletedId)
+  }
+
+updateCompletedTodo : TodoChildren -> Int -> TodoChildren
+updateCompletedTodo (TodoChildren todolist) completedTodoId =
+  let
+    markTodoAsComplete todo =
+      if todo.id == completedTodoId then
+        setTodoToComplete todo
+      else
+        recursiveFindCompletedTodo todo completedTodoId
+  in
+    (TodoChildren (List.map markTodoAsComplete todolist))
+
+
+recursiveFindCompletedTodo : Todo -> Int -> Todo
+recursiveFindCompletedTodo todo completedTodoId =
+  {
+    todo
+    | children = updateCompletedTodo todo.children completedTodoId  
+  }
+
+setTodoToComplete : Todo -> Todo
+setTodoToComplete todo =
+  {
+    todo
+    | completed = True
+    , children = recursiveSetTodoChildrenToComplete todo.children
+  }
+
+recursiveSetTodoChildrenToComplete : TodoChildren -> TodoChildren
+recursiveSetTodoChildrenToComplete (TodoChildren todolist) =
+  let
+    markTodoAsComplete todo =
+      setTodoToComplete todo
+        
+  in
+    (TodoChildren (List.map markTodoAsComplete todolist))
+    
+
 -- SUBSCRIPTIONS
 
 subscriptions : Model -> Sub Msg
@@ -289,26 +341,33 @@ displayTodoList (TodoChildren todoList) =
 displaySingleTodo : Todo -> Html Msg
 displaySingleTodo todo =
   div[margin15Style , attribute "id" (toString todo.id) ] --style [("margin-left", "15px;")] ]
-  [
-    button
-    [
-      onClick (DeleteTodo todo.id) 
-    ]
-    [
-      text "delete"
-    ]
+  [ button
+      [
+        onClick (DeleteTodo todo.id) 
+      ]
+      [
+        text "delete"
+      ]
     , input
-    [
-      myStyle 
-      , placeholder "New todo"
-      , onEnter (AddChildTodo todo.id)
-      , onInput (UpdateTodo todo.id)
-      , value todo.description
-    ][]
-    , div [ margin15Style] --style [("margin-left", "15px;")] ]
-    [
-      displayTodoList todo.children
-    ]
+      [ 
+        type' "checkbox"
+        , onClick (TodoCompleted todo.id) 
+      ]
+      []
+    , input
+      [
+        myStyle 
+        , placeholder "New todo"
+        , onEnter (AddChildTodo todo.id)
+        , onInput (UpdateTodo todo.id)
+        , value todo.description
+      ]
+      []
+    , div 
+      [ margin15Style ] --style [("margin-left", "15px;")] ]
+      [
+        displayTodoList todo.children
+      ]
   ]
 
 -- VIEW

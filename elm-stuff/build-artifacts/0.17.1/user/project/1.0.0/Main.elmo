@@ -38,9 +38,9 @@ var _user$project$Main$updateTodoItemDescription = F2(
 			todo,
 			{description: newDesc});
 	});
-var _user$project$Main$Todo = F3(
-	function (a, b, c) {
-		return {id: a, description: b, children: c};
+var _user$project$Main$Todo = F4(
+	function (a, b, c, d) {
+		return {id: a, description: b, completed: c, children: d};
 	});
 var _user$project$Main$Model = F3(
 	function (a, b, c) {
@@ -54,6 +54,7 @@ var _user$project$Main$newEntry = F2(
 		return {
 			id: newId,
 			description: str,
+			completed: false,
 			children: _user$project$Main$TodoChildren(
 				_elm_lang$core$Native_List.fromArray(
 					[]))
@@ -170,13 +171,54 @@ var _user$project$Main$deleteTodoFromModel = F2(
 				entries: A2(_user$project$Main$deleteTodoFromList, model.entries, todoToDeleteId)
 			});
 	});
+var _user$project$Main$recursiveSetTodoChildrenToComplete = function (_p11) {
+	var _p12 = _p11;
+	var markTodoAsComplete = function (todo) {
+		return _user$project$Main$setTodoToComplete(todo);
+	};
+	return _user$project$Main$TodoChildren(
+		A2(_elm_lang$core$List$map, markTodoAsComplete, _p12._0));
+};
+var _user$project$Main$setTodoToComplete = function (todo) {
+	return _elm_lang$core$Native_Utils.update(
+		todo,
+		{
+			completed: true,
+			children: _user$project$Main$recursiveSetTodoChildrenToComplete(todo.children)
+		});
+};
+var _user$project$Main$updateCompletedTodo = F2(
+	function (_p13, completedTodoId) {
+		var _p14 = _p13;
+		var markTodoAsComplete = function (todo) {
+			return _elm_lang$core$Native_Utils.eq(todo.id, completedTodoId) ? _user$project$Main$setTodoToComplete(todo) : A2(_user$project$Main$recursiveFindCompletedTodo, todo, completedTodoId);
+		};
+		return _user$project$Main$TodoChildren(
+			A2(_elm_lang$core$List$map, markTodoAsComplete, _p14._0));
+	});
+var _user$project$Main$recursiveFindCompletedTodo = F2(
+	function (todo, completedTodoId) {
+		return _elm_lang$core$Native_Utils.update(
+			todo,
+			{
+				children: A2(_user$project$Main$updateCompletedTodo, todo.children, completedTodoId)
+			});
+	});
+var _user$project$Main$markTodoAsCompleted = F2(
+	function (model, todoCompletedId) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				entries: A2(_user$project$Main$updateCompletedTodo, model.entries, todoCompletedId)
+			});
+	});
 var _user$project$Main$addToTodoChild = F3(
-	function (_p11, newTodoText, newTodoVal) {
-		var _p12 = _p11;
+	function (_p15, newTodoText, newTodoVal) {
+		var _p16 = _p15;
 		return _user$project$Main$TodoChildren(
 			A2(
 				_elm_lang$core$Basics_ops['++'],
-				_p12._0,
+				_p16._0,
 				_elm_lang$core$Native_List.fromArray(
 					[
 						A2(_user$project$Main$newEntry, newTodoText, newTodoVal)
@@ -196,8 +238,8 @@ var _user$project$Main$addTodo = function (model) {
 };
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p13 = msg;
-		switch (_p13.ctor) {
+		var _p17 = msg;
+		switch (_p17.ctor) {
 			case 'NoOp':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
@@ -213,7 +255,7 @@ var _user$project$Main$update = F2(
 			case 'UpdateTodo':
 				return {
 					ctor: '_Tuple2',
-					_0: A3(_user$project$Main$updateTodoModelDesc, model, _p13._0, _p13._1),
+					_0: A3(_user$project$Main$updateTodoModelDesc, model, _p17._0, _p17._1),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'UpdateField':
@@ -221,25 +263,31 @@ var _user$project$Main$update = F2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
 						model,
-						{field: _p13._0}),
+						{field: _p17._0}),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			case 'AddChildTodo':
 				return {
 					ctor: '_Tuple2',
-					_0: A2(_user$project$Main$createNewChildForTodo, model, _p13._0),
+					_0: A2(_user$project$Main$createNewChildForTodo, model, _p17._0),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'DeleteTodo':
+				return {
+					ctor: '_Tuple2',
+					_0: A2(_user$project$Main$deleteTodoFromModel, model, _p17._0),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			default:
 				return {
 					ctor: '_Tuple2',
-					_0: A2(_user$project$Main$deleteTodoFromModel, model, _p13._0),
+					_0: A2(_user$project$Main$markTodoAsCompleted, model, _p17._0),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 		}
 	});
-var _user$project$Main$AllTodoChildren = function (a) {
-	return {ctor: 'AllTodoChildren', _0: a};
+var _user$project$Main$TodoCompleted = function (a) {
+	return {ctor: 'TodoCompleted', _0: a};
 };
 var _user$project$Main$DeleteTodo = function (a) {
 	return {ctor: 'DeleteTodo', _0: a};
@@ -348,6 +396,16 @@ var _user$project$Main$displaySingleTodo = function (todo) {
 				_elm_lang$html$Html$input,
 				_elm_lang$core$Native_List.fromArray(
 					[
+						_elm_lang$html$Html_Attributes$type$('checkbox'),
+						_elm_lang$html$Html_Events$onClick(
+						_user$project$Main$TodoCompleted(todo.id))
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[])),
+				A2(
+				_elm_lang$html$Html$input,
+				_elm_lang$core$Native_List.fromArray(
+					[
 						_user$project$Main$myStyle,
 						_elm_lang$html$Html_Attributes$placeholder('New todo'),
 						_user$project$Main$onEnter(
@@ -368,13 +426,13 @@ var _user$project$Main$displaySingleTodo = function (todo) {
 					]))
 			]));
 };
-var _user$project$Main$displayTodoList = function (_p14) {
-	var _p15 = _p14;
+var _user$project$Main$displayTodoList = function (_p18) {
+	var _p19 = _p18;
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
 			[]),
-		A2(_elm_lang$core$List$map, _user$project$Main$displaySingleTodo, _p15._0));
+		A2(_elm_lang$core$List$map, _user$project$Main$displaySingleTodo, _p19._0));
 };
 var _user$project$Main$view = function (model) {
 	return A2(
