@@ -187,6 +187,7 @@ deleteTodoFromList (TodoChildren todoChild) todoToDeleteId =
   in
     (TodoChildren (List.filterMap removeTodo todoChild))
 
+--recursively delete todos
 recursiveDeleteTodo : Todo -> Int -> Todo
 recursiveDeleteTodo todo todoToDeleteId =
   {
