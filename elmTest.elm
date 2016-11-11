@@ -4,6 +4,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode as Json
 import String
+import Array
 
 main =
   App.program
@@ -15,17 +16,6 @@ main =
 
 -- MODEL
 
--- test material
---type alias Todo = 
---  {id:Int}
---{id : Int, children : List Todo }
-  
---testModel : Todo
---testModel = 
- --{
---   id = 0
- --}
-
 type alias Todo =
     { id: Int
     , description: String
@@ -33,6 +23,8 @@ type alias Todo =
     }
 
 type TodoChildren = TodoChildren (List Todo)
+
+type AllTodoChildren = AllTodoChildren (Array.Array Todo)
 
 --Create a new Todo Entry
 newEntry: String -> Int -> Todo
@@ -73,6 +65,7 @@ type Msg
   | UpdateTodo Int String
   | UpdateField String
   | AddChildTodo Int
+  | DeleteTodo Int
   -- | NewFace Int
 
 
@@ -87,12 +80,6 @@ update msg model =
 
    UpdateTodo id newDescription ->
     ((updateTodoModelDesc model id newDescription), Cmd.none )
-    -- {model | entries = updateTodochild } ! []
-    -- let
-    --   updateTodo t =
-    --     if t.id == id then {t | description = newDescription} else t
-    -- in
-    --   ({model | entries = List.map updateTodo model.entries }) ! []
 
    UpdateField str  ->
     { model | field = str } ! []
@@ -100,7 +87,9 @@ update msg model =
    AddChildTodo todoId ->
     ((createNewChildForTodo model todoId), Cmd.none)
 
-    
+   DeleteTodo todoId ->
+    ((deleteTodoFromModel model todoId), Cmd.none)
+
 
 --FUNCTIONS
 createNewChildForTodo : Model -> Int -> Model
@@ -108,75 +97,102 @@ createNewChildForTodo model todoId =
   {
     model 
     | uid= model.uid + 1
-    , entries = (addNewTodoToChildrenList model.entries todoId (model.uid + 1) )
+    , entries = (addNewTodoToChildrenList model.entries todoId (model.uid) )
   }
-  --  let
-  --   createChildTodo todo newTodoId =
-  --     if todo.id == todoId then 
-  --       { 
-  --         todo 
-  --         | children = 
-  --           [{ id = newTodoId 
-  --             , description = "new child"
-  --             , children = (TodoChildren [])}]
-  --       } 
-  --     else todo
-  --  in
-  --   {model 
-  --    | uid= model.uid + 1
-  --    , entries = List.map createChildTodo model.entries model.uid++ 
-  --   }
+  
 
 addNewTodoToChildrenList : TodoChildren -> Int -> Int -> TodoChildren
-addNewTodoToChildrenList (TodoChildren todoChild) todoId newTodoId =
+addNewTodoToChildrenList (TodoChildren todoChild) parentTodoId newTodoId =
   let
     createChildTodo todo =
-      if todo.id == todoId then 
+      if todo.id == parentTodoId then 
         { 
           todo 
-          | children = addTodoChildToChildrenList todo.children newTodoId
-            -- TodoChildren (
-            --   [
-            --     { 
-            --       id = newTodoId 
-            --       , description = "new child"
-            --       , children = (TodoChildren [])
-            --     }
-            --   ])
+          | children = addEmptyTodoChildToChildrenList todo.children newTodoId            
         } 
-      else todo
+      else 
+        recursiveAddNewTodoItem todo parentTodoId newTodoId
    in
     TodoChildren (List.map createChildTodo todoChild)
 
-addTodoChildToChildrenList : TodoChildren -> Int -> TodoChildren
-addTodoChildToChildrenList (TodoChildren todo) newTodoId =
-  -- {
-  --   todo ++ 
-  --   [
-  --     { 
-  --       id = newTodoId 
-  --       , description = "new child"
-  --       , children = (TodoChildren [])
-  --     }
-  --   ]
-  -- }
-  (TodoChildren (todo ++ [{children = (TodoChildren []), description = "", id = newTodoId}]))
+
+recursiveAddNewTodoItem : Todo -> Int -> Int -> Todo
+recursiveAddNewTodoItem todo parentTodoId newTodoId =
+  {
+    todo
+    | children = addNewTodoToChildrenList todo.children parentTodoId newTodoId
+  }
+
+addEmptyTodoChildToChildrenList : TodoChildren -> Int -> TodoChildren
+addEmptyTodoChildToChildrenList (TodoChildren todo) newTodoId =
+  (TodoChildren (todo ++ [(newEntry "" newTodoId)]))
 
 updateTodoModelDesc : Model -> Int -> String -> Model
 updateTodoModelDesc model id desc =
   {
     model
-    | entries = (updateTodochildDesc model.entries id desc) 
+    | entries =  (updateTodochildDesc model.entries id desc) 
   }
 
+updateTodoItemDescription : Todo -> String -> Todo
+updateTodoItemDescription todo newDesc =
+  {
+    todo
+    | description = newDesc
+  }
 
+{-- 
+  This method is used to update the description of the todos
+--}
 updateTodochildDesc : TodoChildren -> Int -> String -> TodoChildren
 updateTodochildDesc (TodoChildren todoChild) todoId newDesc =
   let
     updateTodoDesc todo =
-      if todo.id == todoId then {todo | description = newDesc} else todo
+      if todo.id == todoId then 
+        updateTodoItemDescription todo newDesc 
+      else 
+        -- todo
+        recursiveUpdateSingleTodoDesc todo todoId newDesc
+        
   in
     TodoChildren (List.map updateTodoDesc todoChild)
+
+recursiveUpdateSingleTodoDesc : Todo -> Int -> String -> Todo
+recursiveUpdateSingleTodoDesc todoItem todoId newDesc =  
+  {
+    todoItem
+    | children = updateTodochildDesc todoItem.children todoId newDesc
+  }  
+
+
+-- Delete todo from model
+deleteTodoFromModel : Model -> Int -> Model
+deleteTodoFromModel model todoToDeleteId =
+  {
+    model
+    | entries =  (deleteTodoFromList model.entries todoToDeleteId) 
+  }
+
+{-- 
+  This method is used to delete todos
+--}
+deleteTodoFromList : TodoChildren -> Int -> TodoChildren
+deleteTodoFromList (TodoChildren todoChild) todoToDeleteId =
+  let
+    removeTodo todo =
+      if todo.id == todoToDeleteId then
+        Nothing
+      else
+        Just (recursiveDeleteTodo todo todoToDeleteId)      
+  in
+    (TodoChildren (List.filterMap removeTodo todoChild))
+
+recursiveDeleteTodo : Todo -> Int -> Todo
+recursiveDeleteTodo todo todoToDeleteId =
+  {
+    todo
+    | children = (deleteTodoFromList todo.children todoToDeleteId)
+  }
 
 
 -- SUBSCRIPTIONS
@@ -185,27 +201,50 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.none
 
--- Functions
--- getNextTodoId : Model -> Int
--- getNextTodoId model = 
---   (model.uid = model.uid + 1)
 
 addTodo : Model -> Model
 addTodo model =
-   { model
-    | uid = model.uid + 1
-    , field = ""
-    , entries =
+  model
+    |> addNewTodoItemToModel
+    |> updateModelUniversalId
+    |> resetModelStringField   
+
+resetModelStringField : Model -> Model
+resetModelStringField model =
+   { 
+     model
+     | field = ""
+   }
+
+updateModelUniversalId : Model -> Model
+updateModelUniversalId model =
+   { 
+     model
+     | uid = model.uid + 1    
+   }
+
+getLastTodoFromList : TodoChildren -> Todo
+getLastTodoFromList (TodoChildren todolist) =
+  case List.head (List.reverse todolist) of
+    Nothing ->
+      (newEntry "" 1 )
+    Just val ->
+      val
+  
+
+addNewTodoItemToModel : Model -> Model
+addNewTodoItemToModel model =
+  { model
+    | entries =
       if String.isEmpty model.field then
         model.entries
       else
-        --model.entries ++ [newEntry model.field model.uid]
-        addToTodoChild model.entries model.field (model.uid + 1)
-   }      
+        addToTodoChild model.entries model.field (model.uid)
+   }
 
 addToTodoChild : TodoChildren -> String -> Int -> TodoChildren
 addToTodoChild (TodoChildren todoChild) newTodoText newTodoVal =
-  (TodoChildren (todoChild ++ [{children = (TodoChildren []), description = newTodoText, id = newTodoVal}]))
+  (TodoChildren (todoChild ++ [(newEntry newTodoText newTodoVal)]))
 
 --Implement onEnter keyboard function
 onEnter : Msg -> Attribute Msg
@@ -245,11 +284,48 @@ displayTodoList (TodoChildren todoList) =
   div[]
   (List.map displaySingleTodo todoList)
 
---Style
+--Display single todo
+displaySingleTodo : Todo -> Html Msg
+displaySingleTodo todo =
+  div[margin15Style , attribute "id" (toString todo.id) ] --style [("margin-left", "15px;")] ]
+  [
+    button
+    [
+      onClick (DeleteTodo todo.id) 
+    ]
+    [
+      text "delete"
+    ]
+    , input
+    [
+      myStyle 
+      , placeholder "New todo"
+      , onEnter (AddChildTodo todo.id)
+      , onInput (UpdateTodo todo.id)
+      , value todo.description
+    ][]
+    , div [ margin15Style] --style [("margin-left", "15px;")] ]
+    [
+      displayTodoList todo.children
+    ]
+  ]
+
+-- VIEW
+view : Model -> Html Msg
+view model =
+    div []
+     [ 
+       showRootView model.field
+       , displayTodoList model.entries
+     ]
+
+
+--STLYES
 myStyle : Attribute Msg
 myStyle =
  style[
-   ("width", "100%")
+   ("width", "80%")
+   , ("margin-left", "15px")
  ]
 
 margin15Style : Attribute Msg
@@ -264,30 +340,8 @@ margin1emBotStyle =
     ("margin-bottom", "1em")
   ]
 
---Display single todo
-displaySingleTodo : Todo -> Html Msg
-displaySingleTodo todo =
-  div[margin15Style , attribute "id" (toString todo.id) ] --style [("margin-left", "15px;")] ]
-  [
-    input[myStyle 
-    -- , placeholder "New todo"
-    , onEnter (AddChildTodo todo.id) --(AddChildTodo todo.children "" -1)
-    , onInput (UpdateTodo todo.id)
-    , value todo.description
-    ]
-    [
-      -- text todo.description
-    ]
-    , div [ margin15Style] --style [("margin-left", "15px;")] ]
-    [
-      displayTodoList todo.children
-    ]
+margin2emTopStyle : Attribute Msg
+margin2emTopStyle = 
+  style[
+    ("margin-top", "2em")
   ]
-
--- VIEW
-view : Model -> Html Msg
-view model =
-    div []
-     [ showRootView model.field
-     , displayTodoList model.entries
-     ]

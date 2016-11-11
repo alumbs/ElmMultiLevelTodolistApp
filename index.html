@@ -7717,6 +7717,11 @@ var _elm_lang$html$Html_Events$Options = F2(
 	function (a, b) {
 		return {stopPropagation: a, preventDefault: b};
 	});
+var _user$project$Main$margin2emTopStyle = _elm_lang$html$Html_Attributes$style(
+	_elm_lang$core$Native_List.fromArray(
+		[
+			{ctor: '_Tuple2', _0: 'margin-top', _1: '2em'}
+		]));
 var _user$project$Main$margin1emBotStyle = _elm_lang$html$Html_Attributes$style(
 	_elm_lang$core$Native_List.fromArray(
 		[
@@ -7730,11 +7735,28 @@ var _user$project$Main$margin15Style = _elm_lang$html$Html_Attributes$style(
 var _user$project$Main$myStyle = _elm_lang$html$Html_Attributes$style(
 	_elm_lang$core$Native_List.fromArray(
 		[
-			{ctor: '_Tuple2', _0: 'width', _1: '100%'}
+			{ctor: '_Tuple2', _0: 'width', _1: '80%'},
+			{ctor: '_Tuple2', _0: 'margin-left', _1: '15px'}
 		]));
+var _user$project$Main$updateModelUniversalId = function (model) {
+	return _elm_lang$core$Native_Utils.update(
+		model,
+		{uid: model.uid + 1});
+};
+var _user$project$Main$resetModelStringField = function (model) {
+	return _elm_lang$core$Native_Utils.update(
+		model,
+		{field: ''});
+};
 var _user$project$Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$none;
 };
+var _user$project$Main$updateTodoItemDescription = F2(
+	function (todo, newDesc) {
+		return _elm_lang$core$Native_Utils.update(
+			todo,
+			{description: newDesc});
+	});
 var _user$project$Main$Todo = F3(
 	function (a, b, c) {
 		return {id: a, description: b, children: c};
@@ -7756,6 +7778,16 @@ var _user$project$Main$newEntry = F2(
 					[]))
 		};
 	});
+var _user$project$Main$getLastTodoFromList = function (_p0) {
+	var _p1 = _p0;
+	var _p2 = _elm_lang$core$List$head(
+		_elm_lang$core$List$reverse(_p1._0));
+	if (_p2.ctor === 'Nothing') {
+		return A2(_user$project$Main$newEntry, '', 1);
+	} else {
+		return _p2._0;
+	}
+};
 var _user$project$Main$emptyModel = {
 	entries: _user$project$Main$TodoChildren(
 		_elm_lang$core$Native_List.fromArray(
@@ -7764,36 +7796,38 @@ var _user$project$Main$emptyModel = {
 	uid: 0
 };
 var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Main$emptyModel, _1: _elm_lang$core$Platform_Cmd$none};
-var _user$project$Main$addTodoChildToChildrenList = F2(
-	function (_p0, newTodoId) {
-		var _p1 = _p0;
+var _user$project$Main$addEmptyTodoChildToChildrenList = F2(
+	function (_p3, newTodoId) {
+		var _p4 = _p3;
 		return _user$project$Main$TodoChildren(
 			A2(
 				_elm_lang$core$Basics_ops['++'],
-				_p1._0,
+				_p4._0,
 				_elm_lang$core$Native_List.fromArray(
 					[
-						{
-						children: _user$project$Main$TodoChildren(
-							_elm_lang$core$Native_List.fromArray(
-								[])),
-						description: '',
-						id: newTodoId
-					}
+						A2(_user$project$Main$newEntry, '', newTodoId)
 					])));
 	});
 var _user$project$Main$addNewTodoToChildrenList = F3(
-	function (_p2, todoId, newTodoId) {
-		var _p3 = _p2;
+	function (_p5, parentTodoId, newTodoId) {
+		var _p6 = _p5;
 		var createChildTodo = function (todo) {
-			return _elm_lang$core$Native_Utils.eq(todo.id, todoId) ? _elm_lang$core$Native_Utils.update(
+			return _elm_lang$core$Native_Utils.eq(todo.id, parentTodoId) ? _elm_lang$core$Native_Utils.update(
 				todo,
 				{
-					children: A2(_user$project$Main$addTodoChildToChildrenList, todo.children, newTodoId)
-				}) : todo;
+					children: A2(_user$project$Main$addEmptyTodoChildToChildrenList, todo.children, newTodoId)
+				}) : A3(_user$project$Main$recursiveAddNewTodoItem, todo, parentTodoId, newTodoId);
 		};
 		return _user$project$Main$TodoChildren(
-			A2(_elm_lang$core$List$map, createChildTodo, _p3._0));
+			A2(_elm_lang$core$List$map, createChildTodo, _p6._0));
+	});
+var _user$project$Main$recursiveAddNewTodoItem = F3(
+	function (todo, parentTodoId, newTodoId) {
+		return _elm_lang$core$Native_Utils.update(
+			todo,
+			{
+				children: A3(_user$project$Main$addNewTodoToChildrenList, todo.children, parentTodoId, newTodoId)
+			});
 	});
 var _user$project$Main$createNewChildForTodo = F2(
 	function (model, todoId) {
@@ -7801,19 +7835,25 @@ var _user$project$Main$createNewChildForTodo = F2(
 			model,
 			{
 				uid: model.uid + 1,
-				entries: A3(_user$project$Main$addNewTodoToChildrenList, model.entries, todoId, model.uid + 1)
+				entries: A3(_user$project$Main$addNewTodoToChildrenList, model.entries, todoId, model.uid)
 			});
 	});
 var _user$project$Main$updateTodochildDesc = F3(
-	function (_p4, todoId, newDesc) {
-		var _p5 = _p4;
+	function (_p7, todoId, newDesc) {
+		var _p8 = _p7;
 		var updateTodoDesc = function (todo) {
-			return _elm_lang$core$Native_Utils.eq(todo.id, todoId) ? _elm_lang$core$Native_Utils.update(
-				todo,
-				{description: newDesc}) : todo;
+			return _elm_lang$core$Native_Utils.eq(todo.id, todoId) ? A2(_user$project$Main$updateTodoItemDescription, todo, newDesc) : A3(_user$project$Main$recursiveUpdateSingleTodoDesc, todo, todoId, newDesc);
 		};
 		return _user$project$Main$TodoChildren(
-			A2(_elm_lang$core$List$map, updateTodoDesc, _p5._0));
+			A2(_elm_lang$core$List$map, updateTodoDesc, _p8._0));
+	});
+var _user$project$Main$recursiveUpdateSingleTodoDesc = F3(
+	function (todoItem, todoId, newDesc) {
+		return _elm_lang$core$Native_Utils.update(
+			todoItem,
+			{
+				children: A3(_user$project$Main$updateTodochildDesc, todoItem.children, todoId, newDesc)
+			});
 	});
 var _user$project$Main$updateTodoModelDesc = F3(
 	function (model, id, desc) {
@@ -7823,37 +7863,60 @@ var _user$project$Main$updateTodoModelDesc = F3(
 				entries: A3(_user$project$Main$updateTodochildDesc, model.entries, id, desc)
 			});
 	});
+var _user$project$Main$deleteTodoFromList = F2(
+	function (_p9, todoToDeleteId) {
+		var _p10 = _p9;
+		var removeTodo = function (todo) {
+			return _elm_lang$core$Native_Utils.eq(todo.id, todoToDeleteId) ? _elm_lang$core$Maybe$Nothing : _elm_lang$core$Maybe$Just(
+				A2(_user$project$Main$recursiveDeleteTodo, todo, todoToDeleteId));
+		};
+		return _user$project$Main$TodoChildren(
+			A2(_elm_lang$core$List$filterMap, removeTodo, _p10._0));
+	});
+var _user$project$Main$recursiveDeleteTodo = F2(
+	function (todo, todoToDeleteId) {
+		return _elm_lang$core$Native_Utils.update(
+			todo,
+			{
+				children: A2(_user$project$Main$deleteTodoFromList, todo.children, todoToDeleteId)
+			});
+	});
+var _user$project$Main$deleteTodoFromModel = F2(
+	function (model, todoToDeleteId) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				entries: A2(_user$project$Main$deleteTodoFromList, model.entries, todoToDeleteId)
+			});
+	});
 var _user$project$Main$addToTodoChild = F3(
-	function (_p6, newTodoText, newTodoVal) {
-		var _p7 = _p6;
+	function (_p11, newTodoText, newTodoVal) {
+		var _p12 = _p11;
 		return _user$project$Main$TodoChildren(
 			A2(
 				_elm_lang$core$Basics_ops['++'],
-				_p7._0,
+				_p12._0,
 				_elm_lang$core$Native_List.fromArray(
 					[
-						{
-						children: _user$project$Main$TodoChildren(
-							_elm_lang$core$Native_List.fromArray(
-								[])),
-						description: newTodoText,
-						id: newTodoVal
-					}
+						A2(_user$project$Main$newEntry, newTodoText, newTodoVal)
 					])));
 	});
-var _user$project$Main$addTodo = function (model) {
+var _user$project$Main$addNewTodoItemToModel = function (model) {
 	return _elm_lang$core$Native_Utils.update(
 		model,
 		{
-			uid: model.uid + 1,
-			field: '',
-			entries: _elm_lang$core$String$isEmpty(model.field) ? model.entries : A3(_user$project$Main$addToTodoChild, model.entries, model.field, model.uid + 1)
+			entries: _elm_lang$core$String$isEmpty(model.field) ? model.entries : A3(_user$project$Main$addToTodoChild, model.entries, model.field, model.uid)
 		});
+};
+var _user$project$Main$addTodo = function (model) {
+	return _user$project$Main$resetModelStringField(
+		_user$project$Main$updateModelUniversalId(
+			_user$project$Main$addNewTodoItemToModel(model)));
 };
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p8 = msg;
-		switch (_p8.ctor) {
+		var _p13 = msg;
+		switch (_p13.ctor) {
 			case 'NoOp':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
@@ -7869,7 +7932,7 @@ var _user$project$Main$update = F2(
 			case 'UpdateTodo':
 				return {
 					ctor: '_Tuple2',
-					_0: A3(_user$project$Main$updateTodoModelDesc, model, _p8._0, _p8._1),
+					_0: A3(_user$project$Main$updateTodoModelDesc, model, _p13._0, _p13._1),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'UpdateField':
@@ -7877,17 +7940,29 @@ var _user$project$Main$update = F2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
 						model,
-						{field: _p8._0}),
+						{field: _p13._0}),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
+			case 'AddChildTodo':
+				return {
+					ctor: '_Tuple2',
+					_0: A2(_user$project$Main$createNewChildForTodo, model, _p13._0),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 			default:
 				return {
 					ctor: '_Tuple2',
-					_0: A2(_user$project$Main$createNewChildForTodo, model, _p8._0),
+					_0: A2(_user$project$Main$deleteTodoFromModel, model, _p13._0),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 		}
 	});
+var _user$project$Main$AllTodoChildren = function (a) {
+	return {ctor: 'AllTodoChildren', _0: a};
+};
+var _user$project$Main$DeleteTodo = function (a) {
+	return {ctor: 'DeleteTodo', _0: a};
+};
 var _user$project$Main$AddChildTodo = function (a) {
 	return {ctor: 'AddChildTodo', _0: a};
 };
@@ -7978,10 +8053,22 @@ var _user$project$Main$displaySingleTodo = function (todo) {
 		_elm_lang$core$Native_List.fromArray(
 			[
 				A2(
+				_elm_lang$html$Html$button,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Events$onClick(
+						_user$project$Main$DeleteTodo(todo.id))
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text('delete')
+					])),
+				A2(
 				_elm_lang$html$Html$input,
 				_elm_lang$core$Native_List.fromArray(
 					[
 						_user$project$Main$myStyle,
+						_elm_lang$html$Html_Attributes$placeholder('New todo'),
 						_user$project$Main$onEnter(
 						_user$project$Main$AddChildTodo(todo.id)),
 						_elm_lang$html$Html_Events$onInput(
@@ -8000,13 +8087,13 @@ var _user$project$Main$displaySingleTodo = function (todo) {
 					]))
 			]));
 };
-var _user$project$Main$displayTodoList = function (_p9) {
-	var _p10 = _p9;
+var _user$project$Main$displayTodoList = function (_p14) {
+	var _p15 = _p14;
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
 			[]),
-		A2(_elm_lang$core$List$map, _user$project$Main$displaySingleTodo, _p10._0));
+		A2(_elm_lang$core$List$map, _user$project$Main$displaySingleTodo, _p15._0));
 };
 var _user$project$Main$view = function (model) {
 	return A2(
