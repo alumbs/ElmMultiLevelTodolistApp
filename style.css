@@ -6,6 +6,15 @@ div.todoParentContainer input
     font-family: Arial, Helvetica, sans-serif;
 }
 
+input[type=checkbox]
+{
+  /* one-eight sized Checkboxes */
+  -ms-transform: scale(1.8); /* IE */
+  -moz-transform: scale(1.8); /* FF */
+  -webkit-transform: scale(1.8); /* Safari and Chrome */
+  -o-transform: scale(1.8); /* Opera */
+}
+
 div.completed > div.todoDetailsContainer > div.view > label
 {
     text-decoration: line-through;
@@ -36,6 +45,11 @@ div.hideChildren
 div.todoDetailsContainer
 {
     overflow: hidden;
+    padding: 10px;
+    border-style: ridge;  
+    border-width: 2px;
+    border-color: #E2FAFF;    
+    border-radius: 16px;
 }
 
 div.todoChildContainer
@@ -62,5 +76,5 @@ div.view > label
     padding: 5px;
     margin: 0 0 0 30px;
     display: inline-block;
-    border: 2px groove #dae3f2;
+    border: 2px groove #E2FAFF;
 }
