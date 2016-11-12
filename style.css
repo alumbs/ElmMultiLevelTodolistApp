@@ -13,7 +13,7 @@ div.todoParentContainer
 
 div.todoParentContainer > div.todoChildContainer 
 {
-    border-left: 2px groove #E2FAFF;
+    border-left: 1px ridge #e2faff;
 }
 
 input[type=checkbox]
