@@ -8601,32 +8601,6 @@ var _user$project$Todo$addTodo = function (model) {
 		_user$project$Todo$updateModelUniversalId(
 			_user$project$Todo$addNewTodoItemToModel(model)));
 };
-var _user$project$Todo$EditingEntry = F2(
-	function (a, b) {
-		return {ctor: 'EditingEntry', _0: a, _1: b};
-	});
-var _user$project$Todo$ToggleShowChildTodos = F2(
-	function (a, b) {
-		return {ctor: 'ToggleShowChildTodos', _0: a, _1: b};
-	});
-var _user$project$Todo$ToggleTodoCompleted = function (a) {
-	return {ctor: 'ToggleTodoCompleted', _0: a};
-};
-var _user$project$Todo$DeleteTodo = function (a) {
-	return {ctor: 'DeleteTodo', _0: a};
-};
-var _user$project$Todo$AddChildTodo = function (a) {
-	return {ctor: 'AddChildTodo', _0: a};
-};
-var _user$project$Todo$UpdateField = function (a) {
-	return {ctor: 'UpdateField', _0: a};
-};
-var _user$project$Todo$UpdateTodo = F2(
-	function (a, b) {
-		return {ctor: 'UpdateTodo', _0: a, _1: b};
-	});
-var _user$project$Todo$Add = {ctor: 'Add'};
-var _user$project$Todo$NoOp = {ctor: 'NoOp'};
 var _user$project$Todo$update = F2(
 	function (msg, model) {
 		var _p21 = msg;
@@ -8675,7 +8649,7 @@ var _user$project$Todo$update = F2(
 					_0: A2(_user$project$Todo$toggleTodoCompletedField, model, _p21._0),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			case 'ToggleShowChildTodos':
+			default:
 				return _elm_lang$core$Native_Utils.eq(
 					_p21._0,
 					_user$project$Todo$TodoChildren(
@@ -8689,34 +8663,30 @@ var _user$project$Todo$update = F2(
 					_0: A2(_user$project$Todo$toggleShowChildrenVisibleField, model, _p21._1),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			default:
-				var _p24 = _p21._0;
-				var focus = _elm_lang$dom$Dom$focus(
-					A2(
-						_elm_lang$core$Basics_ops['++'],
-						'todo-',
-						_elm_lang$core$Basics$toString(_p24)));
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					_elm_lang$core$Native_Utils.update(
-						model,
-						{
-							entries: A3(_user$project$Todo$setTodoEditingToValue, model.entries, _p24, _p21._1)
-						}),
-					_elm_lang$core$Native_List.fromArray(
-						[
-							A3(
-							_elm_lang$core$Task$perform,
-							function (_p22) {
-								return _user$project$Todo$NoOp;
-							},
-							function (_p23) {
-								return _user$project$Todo$NoOp;
-							},
-							focus)
-						]));
 		}
 	});
+var _user$project$Todo$ToggleShowChildTodos = F2(
+	function (a, b) {
+		return {ctor: 'ToggleShowChildTodos', _0: a, _1: b};
+	});
+var _user$project$Todo$ToggleTodoCompleted = function (a) {
+	return {ctor: 'ToggleTodoCompleted', _0: a};
+};
+var _user$project$Todo$DeleteTodo = function (a) {
+	return {ctor: 'DeleteTodo', _0: a};
+};
+var _user$project$Todo$AddChildTodo = function (a) {
+	return {ctor: 'AddChildTodo', _0: a};
+};
+var _user$project$Todo$UpdateField = function (a) {
+	return {ctor: 'UpdateField', _0: a};
+};
+var _user$project$Todo$UpdateTodo = F2(
+	function (a, b) {
+		return {ctor: 'UpdateTodo', _0: a, _1: b};
+	});
+var _user$project$Todo$Add = {ctor: 'Add'};
+var _user$project$Todo$NoOp = {ctor: 'NoOp'};
 var _user$project$Todo$onEnter = function (msg) {
 	var tagger = function (code) {
 		return _elm_lang$core$Native_Utils.eq(code, 13) ? msg : _user$project$Todo$NoOp;
@@ -8864,26 +8834,6 @@ var _user$project$Todo$displaySingleTodo = function (todo) {
 									[]))
 							])),
 						A2(
-						_elm_lang$html$Html$div,
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html_Attributes$class('view')
-							]),
-						_elm_lang$core$Native_List.fromArray(
-							[
-								A2(
-								_elm_lang$html$Html$label,
-								_elm_lang$core$Native_List.fromArray(
-									[
-										_elm_lang$html$Html_Events$onClick(
-										A2(_user$project$Todo$EditingEntry, todo.id, true))
-									]),
-								_elm_lang$core$Native_List.fromArray(
-									[
-										_elm_lang$html$Html$text(todo.description)
-									]))
-							])),
-						A2(
 						_elm_lang$html$Html$input,
 						_elm_lang$core$Native_List.fromArray(
 							[
@@ -8898,8 +8848,6 @@ var _user$project$Todo$displaySingleTodo = function (todo) {
 								_user$project$Todo$AddChildTodo(todo.id)),
 								_elm_lang$html$Html_Events$onInput(
 								_user$project$Todo$UpdateTodo(todo.id)),
-								_elm_lang$html$Html_Events$onBlur(
-								A2(_user$project$Todo$EditingEntry, todo.id, false)),
 								_elm_lang$html$Html_Attributes$value(todo.description)
 							]),
 						_elm_lang$core$Native_List.fromArray(
@@ -8922,13 +8870,13 @@ var _user$project$Todo$displaySingleTodo = function (todo) {
 					]))
 			]));
 };
-var _user$project$Todo$displayTodoList = function (_p25) {
-	var _p26 = _p25;
+var _user$project$Todo$displayTodoList = function (_p22) {
+	var _p23 = _p22;
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
 			[]),
-		A2(_elm_lang$core$List$map, _user$project$Todo$displaySingleTodo, _p26._0));
+		A2(_elm_lang$core$List$map, _user$project$Todo$displaySingleTodo, _p23._0));
 };
 var _user$project$Todo$view = function (model) {
 	return A2(

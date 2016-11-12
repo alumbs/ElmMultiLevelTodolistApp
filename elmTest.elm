@@ -78,7 +78,7 @@ type Msg
   | DeleteTodo Int
   | ToggleTodoCompleted Int
   | ToggleShowChildTodos TodoChildren Int
-  | EditingEntry Int Bool
+  -- | EditingEntry Int Bool
   -- | NewFace Int
 
 
@@ -112,16 +112,16 @@ update msg model =
     else
       ((toggleShowChildrenVisibleField model todoId) , Cmd.none)
 
-   EditingEntry id isEditing ->
-      let
-          focus =
-              Dom.focus ("todo-" ++ toString id)
-      in
-          { 
-            model 
-            | entries = setTodoEditingToValue model.entries id isEditing 
-          }
-          ! [ Task.perform (\_ -> NoOp) (\_ -> NoOp) focus ]
+  --  EditingEntry id isEditing ->
+  --     let
+  --         focus =
+  --             Dom.focus ("todo-" ++ toString id)
+  --     in
+  --         { 
+  --           model 
+  --           | entries = setTodoEditingToValue model.entries id isEditing 
+  --         }
+  --         ! [ Task.perform (\_ -> NoOp) (\_ -> NoOp) focus ]
 
 
 --FUNCTIONS
@@ -474,13 +474,13 @@ displaySingleTodo todo =
             ]
             [] 
         ]
-        , div
-          [class "view"]
-          [
-            label
-              [onClick (EditingEntry todo.id True)] 
-              [text todo.description]
-          ]
+        -- , div
+        --   [class "view"]
+        --   [
+        --     label
+        --       [onClick (EditingEntry todo.id True)] 
+        --       [text todo.description]
+        --   ]
         , input
           [
             -- myStyle          
@@ -489,7 +489,7 @@ displaySingleTodo todo =
             , id ("todo-" ++ toString todo.id)
             , onEnter (AddChildTodo todo.id)
             , onInput (UpdateTodo todo.id)
-            , onBlur (EditingEntry todo.id False)
+            -- , onBlur (EditingEntry todo.id False)
             , value todo.description
           ]
           [] 

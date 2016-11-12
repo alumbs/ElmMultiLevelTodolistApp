@@ -6,6 +6,17 @@ div.todoParentContainer input
     font-family: Arial, Helvetica, sans-serif;
 }
 
+div.todoParentContainer > div.todoChildContainer 
+{
+    border-left: 2px groove #E2FAFF;
+}
+
+/*div.todoParentContainer > div.todoChildContainer:last-child,
+div.todoParentContainer > div.todoChildContainer:only-child
+{
+    border-left: 0;
+}*/
+
 input[type=checkbox]
 {
   /* one-eight sized Checkboxes */
@@ -20,22 +31,24 @@ div.completed > div.todoDetailsContainer > div.view > label
     text-decoration: line-through;
 }
 
-input.edit
+input.edit:focus
 {
-    display: none;
-    min-height: 16px;
+    outline: none;
 }
 
-div.editing .edit {
+/*div.editing .edit {*/
+div.todoDetailsContainer > input.edit {
     display: inline-block;
+    min-height: 16px;
     width: 80%;
     padding: 5px;
-    margin: 0 0 0 30px;
+    margin: 0 0 0 15px;
+    border: 0;
 }
 
-div.editing .view {
+/*div.editing .view {
     display: none;
-}
+}*/
 
 div.hideChildren
 {
@@ -55,7 +68,7 @@ div.todoDetailsContainer
 div.todoChildContainer
 {
     clear: both;
-    padding-top: 3px;
+    /*padding-top: 3px;*/
 }
 
 div.todoControls,
