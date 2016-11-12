@@ -22,6 +22,7 @@ type alias Todo =
     { id: Int
     , description: String
     , completed: Bool
+    , childrenVisible: Bool
     , children: TodoChildren
     }
 
@@ -36,6 +37,7 @@ newEntry str newId =
       id = newId
     , description = str
     , completed = False
+    , childrenVisible = True
     , children = (TodoChildren [])
   }
 
@@ -71,6 +73,7 @@ type Msg
   | AddChildTodo Int
   | DeleteTodo Int
   | ToggleTodoCompleted Int
+  | ToggleShowChildTodos TodoChildren Int
   -- | NewFace Int
 
 
@@ -98,8 +101,47 @@ update msg model =
    ToggleTodoCompleted todoId ->
     ((toggleTodoCompletedField model todoId) , Cmd.none)
 
+   ToggleShowChildTodos todolist todoId ->
+    if todolist == (TodoChildren []) then
+      model ! []
+    else
+      ((toggleShowChildrenVisibleField model todoId) , Cmd.none)
+
 
 --FUNCTIONS
+toggleShowChildrenVisibleField : Model -> Int -> Model
+toggleShowChildrenVisibleField model todoId =
+  {
+    model
+    | entries = (toggleChildrenVisibleField model.entries todoId)
+  }
+
+toggleChildrenVisibleField : TodoChildren -> Int -> TodoChildren
+toggleChildrenVisibleField (TodoChildren todolist) todoId =
+  let
+    toggleChildrenVisible todo =
+      if todo.id == todoId then
+        updateChildrenVisibleField todo
+      else
+        recursiveUpdateChildrenVisibleField todo todoId
+  in
+    (TodoChildren (List.map toggleChildrenVisible todolist))  
+
+recursiveUpdateChildrenVisibleField : Todo -> Int -> Todo
+recursiveUpdateChildrenVisibleField todo todoId =
+  {
+    todo
+    | children = (toggleChildrenVisibleField todo.children todoId)
+  }
+
+
+updateChildrenVisibleField : Todo -> Todo
+updateChildrenVisibleField todo =
+  {
+    todo
+    | childrenVisible = not todo.childrenVisible
+  }
+
 createNewChildForTodo : Model -> Int -> Model
 createNewChildForTodo model todoId =
   {
@@ -348,18 +390,47 @@ displaySingleTodo todo =
 
     isChecked todoCompleted =
       todoCompleted
+
+    showChildren areChildrenVisible =
+      if areChildrenVisible then
+        ""
+      else
+        "hideChildren"
+
+    toggleMinimizeText childrenAreVisible =
+       if childrenAreVisible then
+          "-"
+       else
+          "+"
   in
-    div[margin15Style , attribute "id" (toString todo.id) ] --style [("margin-left", "15px;")] ]
-    [ button
+    div
+    [
+      margin15Style 
+      , marginHalfemTopStyle
+      , attribute "id" (toString todo.id) 
+    ] --style [("margin-left", "15px;")] ]
+    [ 
+      button
         [
-          onClick (DeleteTodo todo.id) 
+          onClick (ToggleShowChildTodos todo.children todo.id)
+          , title "Minimize"
         ]
         [
-          text "delete"
+          text (toggleMinimizeText todo.childrenVisible)
+        ]
+      , button
+        [
+          margin15Style
+          , onClick (DeleteTodo todo.id) 
+          , title "Delete"
+        ]
+        [
+          text "X"
         ]
       , input
         [ 
-          type' "checkbox"
+          margin15Style
+          , type' "checkbox"
           , checked (isChecked todo.completed)
           , onClick (ToggleTodoCompleted todo.id) 
         ]
@@ -375,7 +446,10 @@ displaySingleTodo todo =
         ]
         []
       , div 
-        [ margin15Style ] --style [("margin-left", "15px;")] ]
+        [ 
+          margin15Style
+          , class (showChildren todo.childrenVisible) 
+        ] --style [("margin-left", "15px;")] ]
         [
           displayTodoList todo.children
         ]
@@ -411,8 +485,8 @@ margin1emBotStyle =
     ("margin-bottom", "1em")
   ]
 
-margin2emTopStyle : Attribute Msg
-margin2emTopStyle = 
+marginHalfemTopStyle : Attribute Msg
+marginHalfemTopStyle = 
   style[
-    ("margin-top", "2em")
+    ("margin-top", "0.5em")
   ]

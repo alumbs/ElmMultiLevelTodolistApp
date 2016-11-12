@@ -2,3 +2,8 @@ input.completed
 {
     text-decoration: line-through;
 }
+
+div.hideChildren
+{
+    display: none;
+}
