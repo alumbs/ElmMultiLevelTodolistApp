@@ -11,12 +11,6 @@ div.todoParentContainer > div.todoChildContainer
     border-left: 2px groove #E2FAFF;
 }
 
-/*div.todoParentContainer > div.todoChildContainer:last-child,
-div.todoParentContainer > div.todoChildContainer:only-child
-{
-    border-left: 0;
-}*/
-
 input[type=checkbox]
 {
   /* one-eight sized Checkboxes */
@@ -26,7 +20,8 @@ input[type=checkbox]
   -o-transform: scale(1.8); /* Opera */
 }
 
-div.completed > div.todoDetailsContainer > div.view > label
+/*div.completed > div.todoDetailsContainer > div.view > label*/
+div.completed > div.todoDetailsContainer > input.edit
 {
     text-decoration: line-through;
 }

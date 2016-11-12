@@ -26,12 +26,9 @@ type alias Todo =
     , completed: Bool
     , childrenVisible: Bool
     , children: TodoChildren
-    , editing: Bool
     }
 
 type TodoChildren = TodoChildren (List Todo)
-
--- type AllTodoChildren = AllTodoChildren (Array.Array Todo)
 
 --Create a new Todo Entry
 newEntry: String -> Int -> Todo
@@ -42,11 +39,7 @@ newEntry str newId =
     , completed = False
     , childrenVisible = True
     , children = (TodoChildren [])
-    , editing = False
   }
-
--- type TodoList = TodoList (List Todo)
---type List Todo = Empty | Node Todo (List Todo)
   
 type alias Model =
  { entries : TodoChildren--List Todo
@@ -78,7 +71,6 @@ type Msg
   | DeleteTodo Int
   | ToggleTodoCompleted Int
   | ToggleShowChildTodos TodoChildren Int
-  -- | EditingEntry Int Bool
   -- | NewFace Int
 
 
@@ -112,41 +104,8 @@ update msg model =
     else
       ((toggleShowChildrenVisibleField model todoId) , Cmd.none)
 
-  --  EditingEntry id isEditing ->
-  --     let
-  --         focus =
-  --             Dom.focus ("todo-" ++ toString id)
-  --     in
-  --         { 
-  --           model 
-  --           | entries = setTodoEditingToValue model.entries id isEditing 
-  --         }
-  --         ! [ Task.perform (\_ -> NoOp) (\_ -> NoOp) focus ]
-
 
 --FUNCTIONS
-setTodoEditingToValue : TodoChildren -> Int -> Bool -> TodoChildren
-setTodoEditingToValue (TodoChildren todolist) todoId isEditing =
-  let
-    setTodoEditingField todo =
-      if todo.id == todoId then
-        {
-          todo
-          | editing = isEditing
-        }
-      else
-        recursiveSetTodoEditingToValue todo todoId isEditing
-  in
-    (TodoChildren (List.map setTodoEditingField todolist))
-
-recursiveSetTodoEditingToValue : Todo -> Int -> Bool -> Todo
-recursiveSetTodoEditingToValue todo todoId isEditing =
-  {
-    todo
-    | children = (setTodoEditingToValue todo.children todoId isEditing)
-  }
-
-
 toggleShowChildrenVisibleField : Model -> Int -> Model
 toggleShowChildrenVisibleField model todoId =
   {
@@ -437,7 +396,7 @@ displaySingleTodo todo =
       margin15Style 
       , marginHalfemTopStyle
       , attribute "id" (toString todo.id)
-      , classList [ ("editing", todo.editing), ("completed", todo.completed), ("todoParentContainer", True)]
+      , classList [("completed", todo.completed), ("todoParentContainer", True)]
     ] --style [("margin-left", "15px;")] ]
     [ 
       div
@@ -474,13 +433,6 @@ displaySingleTodo todo =
             ]
             [] 
         ]
-        -- , div
-        --   [class "view"]
-        --   [
-        --     label
-        --       [onClick (EditingEntry todo.id True)] 
-        --       [text todo.description]
-        --   ]
         , input
           [
             -- myStyle          
@@ -489,7 +441,6 @@ displaySingleTodo todo =
             , id ("todo-" ++ toString todo.id)
             , onEnter (AddChildTodo todo.id)
             , onInput (UpdateTodo todo.id)
-            -- , onBlur (EditingEntry todo.id False)
             , value todo.description
           ]
           [] 
@@ -498,8 +449,6 @@ displaySingleTodo todo =
         [ 
           margin15Style
           , class ( String.append "todoChildContainer " (showChildren todo.childrenVisible) )
-          -- , class "todoChildContainer" 
-          -- , classList [("hideChildren", not todo.childrenVisible)] 
         ] --style [("margin-left", "15px;")] ]
         [
           displayTodoList todo.children
