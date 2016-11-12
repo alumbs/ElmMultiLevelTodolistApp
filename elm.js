@@ -2452,22 +2452,124 @@ var _elm_lang$core$List$intersperse = F2(
 			return A2(_elm_lang$core$List_ops['::'], _p21._0, spersed);
 		}
 	});
-var _elm_lang$core$List$take = F2(
+var _elm_lang$core$List$takeReverse = F3(
+	function (n, list, taken) {
+		takeReverse:
+		while (true) {
+			if (_elm_lang$core$Native_Utils.cmp(n, 0) < 1) {
+				return taken;
+			} else {
+				var _p22 = list;
+				if (_p22.ctor === '[]') {
+					return taken;
+				} else {
+					var _v23 = n - 1,
+						_v24 = _p22._1,
+						_v25 = A2(_elm_lang$core$List_ops['::'], _p22._0, taken);
+					n = _v23;
+					list = _v24;
+					taken = _v25;
+					continue takeReverse;
+				}
+			}
+		}
+	});
+var _elm_lang$core$List$takeTailRec = F2(
 	function (n, list) {
+		return _elm_lang$core$List$reverse(
+			A3(
+				_elm_lang$core$List$takeReverse,
+				n,
+				list,
+				_elm_lang$core$Native_List.fromArray(
+					[])));
+	});
+var _elm_lang$core$List$takeFast = F3(
+	function (ctr, n, list) {
 		if (_elm_lang$core$Native_Utils.cmp(n, 0) < 1) {
 			return _elm_lang$core$Native_List.fromArray(
 				[]);
 		} else {
-			var _p22 = list;
-			if (_p22.ctor === '[]') {
-				return list;
-			} else {
-				return A2(
-					_elm_lang$core$List_ops['::'],
-					_p22._0,
-					A2(_elm_lang$core$List$take, n - 1, _p22._1));
-			}
+			var _p23 = {ctor: '_Tuple2', _0: n, _1: list};
+			_v26_5:
+			do {
+				_v26_1:
+				do {
+					if (_p23.ctor === '_Tuple2') {
+						if (_p23._1.ctor === '[]') {
+							return list;
+						} else {
+							if (_p23._1._1.ctor === '::') {
+								switch (_p23._0) {
+									case 1:
+										break _v26_1;
+									case 2:
+										return _elm_lang$core$Native_List.fromArray(
+											[_p23._1._0, _p23._1._1._0]);
+									case 3:
+										if (_p23._1._1._1.ctor === '::') {
+											return _elm_lang$core$Native_List.fromArray(
+												[_p23._1._0, _p23._1._1._0, _p23._1._1._1._0]);
+										} else {
+											break _v26_5;
+										}
+									default:
+										if ((_p23._1._1._1.ctor === '::') && (_p23._1._1._1._1.ctor === '::')) {
+											var _p28 = _p23._1._1._1._0;
+											var _p27 = _p23._1._1._0;
+											var _p26 = _p23._1._0;
+											var _p25 = _p23._1._1._1._1._0;
+											var _p24 = _p23._1._1._1._1._1;
+											return (_elm_lang$core$Native_Utils.cmp(ctr, 1000) > 0) ? A2(
+												_elm_lang$core$List_ops['::'],
+												_p26,
+												A2(
+													_elm_lang$core$List_ops['::'],
+													_p27,
+													A2(
+														_elm_lang$core$List_ops['::'],
+														_p28,
+														A2(
+															_elm_lang$core$List_ops['::'],
+															_p25,
+															A2(_elm_lang$core$List$takeTailRec, n - 4, _p24))))) : A2(
+												_elm_lang$core$List_ops['::'],
+												_p26,
+												A2(
+													_elm_lang$core$List_ops['::'],
+													_p27,
+													A2(
+														_elm_lang$core$List_ops['::'],
+														_p28,
+														A2(
+															_elm_lang$core$List_ops['::'],
+															_p25,
+															A3(_elm_lang$core$List$takeFast, ctr + 1, n - 4, _p24)))));
+										} else {
+											break _v26_5;
+										}
+								}
+							} else {
+								if (_p23._0 === 1) {
+									break _v26_1;
+								} else {
+									break _v26_5;
+								}
+							}
+						}
+					} else {
+						break _v26_5;
+					}
+				} while(false);
+				return _elm_lang$core$Native_List.fromArray(
+					[_p23._1._0]);
+			} while(false);
+			return list;
 		}
+	});
+var _elm_lang$core$List$take = F2(
+	function (n, list) {
+		return A3(_elm_lang$core$List$takeFast, 0, n, list);
 	});
 var _elm_lang$core$List$repeatHelp = F3(
 	function (result, n, value) {
@@ -2476,12 +2578,12 @@ var _elm_lang$core$List$repeatHelp = F3(
 			if (_elm_lang$core$Native_Utils.cmp(n, 0) < 1) {
 				return result;
 			} else {
-				var _v23 = A2(_elm_lang$core$List_ops['::'], value, result),
-					_v24 = n - 1,
-					_v25 = value;
-				result = _v23;
-				n = _v24;
-				value = _v25;
+				var _v27 = A2(_elm_lang$core$List_ops['::'], value, result),
+					_v28 = n - 1,
+					_v29 = value;
+				result = _v27;
+				n = _v28;
+				value = _v29;
 				continue repeatHelp;
 			}
 		}
@@ -2856,7 +2958,10 @@ function work()
 	var process;
 	while (numSteps < MAX_STEPS && (process = workQueue.shift()))
 	{
-		numSteps = step(numSteps, process);
+		if (process.root)
+		{
+			numSteps = step(numSteps, process);
+		}
 	}
 	if (!process)
 	{
@@ -3405,17 +3510,40 @@ var incomingPortMap = F2(function subMap(tagger, finalTagger)
 
 function setupIncomingPort(name, callback)
 {
+	var sentBeforeInit = [];
 	var subs = _elm_lang$core$Native_List.Nil;
 	var converter = effectManagers[name].converter;
+	var currentOnEffects = preInitOnEffects;
+	var currentSend = preInitSend;
 
 	// CREATE MANAGER
 
 	var init = _elm_lang$core$Native_Scheduler.succeed(null);
 
-	function onEffects(router, subList, state)
+	function preInitOnEffects(router, subList, state)
+	{
+		var postInitResult = postInitOnEffects(router, subList, state);
+
+		for(var i = 0; i < sentBeforeInit.length; i++)
+		{
+			postInitSend(sentBeforeInit[i]);
+		}
+
+		sentBeforeInit = null; // to release objects held in queue
+		currentSend = postInitSend;
+		currentOnEffects = postInitOnEffects;
+		return postInitResult;
+	}
+
+	function postInitOnEffects(router, subList, state)
 	{
 		subs = subList;
 		return init;
+	}
+
+	function onEffects(router, subList, state)
+	{
+		return currentOnEffects(router, subList, state);
 	}
 
 	effectManagers[name].init = init;
@@ -3423,9 +3551,14 @@ function setupIncomingPort(name, callback)
 
 	// PUBLIC API
 
-	function send(value)
+	function preInitSend(value)
 	{
-		var result = A2(_elm_lang$core$Json_Decode$decodeValue, converter, value);
+		sentBeforeInit.push(value);
+	}
+
+	function postInitSend(incomingValue)
+	{
+		var result = A2(_elm_lang$core$Json_Decode$decodeValue, converter, incomingValue);
 		if (result.ctor === 'Err')
 		{
 			throw new Error('Trying to send an unexpected type of value through port `' + name + '`:\n' + result._0);
@@ -3438,6 +3571,11 @@ function setupIncomingPort(name, callback)
 			callback(temp._0(value));
 			temp = temp._1;
 		}
+	}
+
+	function send(incomingValue)
+	{
+		currentSend(incomingValue);
 	}
 
 	return { send: send };
@@ -3462,6 +3600,7 @@ return {
 };
 
 }();
+
 var _elm_lang$core$Platform$hack = _elm_lang$core$Native_Scheduler.succeed;
 var _elm_lang$core$Platform$sendToSelf = _elm_lang$core$Native_Platform.sendToSelf;
 var _elm_lang$core$Platform$sendToApp = _elm_lang$core$Native_Platform.sendToApp;
@@ -3627,6 +3766,239 @@ var _elm_lang$core$Result$fromMaybe = F2(
 			return _elm_lang$core$Result$Err(err);
 		}
 	});
+
+var _elm_lang$core$Task$onError = _elm_lang$core$Native_Scheduler.onError;
+var _elm_lang$core$Task$andThen = _elm_lang$core$Native_Scheduler.andThen;
+var _elm_lang$core$Task$spawnCmd = F2(
+	function (router, _p0) {
+		var _p1 = _p0;
+		return _elm_lang$core$Native_Scheduler.spawn(
+			A2(
+				_elm_lang$core$Task$andThen,
+				_p1._0,
+				_elm_lang$core$Platform$sendToApp(router)));
+	});
+var _elm_lang$core$Task$fail = _elm_lang$core$Native_Scheduler.fail;
+var _elm_lang$core$Task$mapError = F2(
+	function (f, task) {
+		return A2(
+			_elm_lang$core$Task$onError,
+			task,
+			function (err) {
+				return _elm_lang$core$Task$fail(
+					f(err));
+			});
+	});
+var _elm_lang$core$Task$succeed = _elm_lang$core$Native_Scheduler.succeed;
+var _elm_lang$core$Task$map = F2(
+	function (func, taskA) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			taskA,
+			function (a) {
+				return _elm_lang$core$Task$succeed(
+					func(a));
+			});
+	});
+var _elm_lang$core$Task$map2 = F3(
+	function (func, taskA, taskB) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			taskA,
+			function (a) {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					taskB,
+					function (b) {
+						return _elm_lang$core$Task$succeed(
+							A2(func, a, b));
+					});
+			});
+	});
+var _elm_lang$core$Task$map3 = F4(
+	function (func, taskA, taskB, taskC) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			taskA,
+			function (a) {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					taskB,
+					function (b) {
+						return A2(
+							_elm_lang$core$Task$andThen,
+							taskC,
+							function (c) {
+								return _elm_lang$core$Task$succeed(
+									A3(func, a, b, c));
+							});
+					});
+			});
+	});
+var _elm_lang$core$Task$map4 = F5(
+	function (func, taskA, taskB, taskC, taskD) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			taskA,
+			function (a) {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					taskB,
+					function (b) {
+						return A2(
+							_elm_lang$core$Task$andThen,
+							taskC,
+							function (c) {
+								return A2(
+									_elm_lang$core$Task$andThen,
+									taskD,
+									function (d) {
+										return _elm_lang$core$Task$succeed(
+											A4(func, a, b, c, d));
+									});
+							});
+					});
+			});
+	});
+var _elm_lang$core$Task$map5 = F6(
+	function (func, taskA, taskB, taskC, taskD, taskE) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			taskA,
+			function (a) {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					taskB,
+					function (b) {
+						return A2(
+							_elm_lang$core$Task$andThen,
+							taskC,
+							function (c) {
+								return A2(
+									_elm_lang$core$Task$andThen,
+									taskD,
+									function (d) {
+										return A2(
+											_elm_lang$core$Task$andThen,
+											taskE,
+											function (e) {
+												return _elm_lang$core$Task$succeed(
+													A5(func, a, b, c, d, e));
+											});
+									});
+							});
+					});
+			});
+	});
+var _elm_lang$core$Task$andMap = F2(
+	function (taskFunc, taskValue) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			taskFunc,
+			function (func) {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					taskValue,
+					function (value) {
+						return _elm_lang$core$Task$succeed(
+							func(value));
+					});
+			});
+	});
+var _elm_lang$core$Task$sequence = function (tasks) {
+	var _p2 = tasks;
+	if (_p2.ctor === '[]') {
+		return _elm_lang$core$Task$succeed(
+			_elm_lang$core$Native_List.fromArray(
+				[]));
+	} else {
+		return A3(
+			_elm_lang$core$Task$map2,
+			F2(
+				function (x, y) {
+					return A2(_elm_lang$core$List_ops['::'], x, y);
+				}),
+			_p2._0,
+			_elm_lang$core$Task$sequence(_p2._1));
+	}
+};
+var _elm_lang$core$Task$onEffects = F3(
+	function (router, commands, state) {
+		return A2(
+			_elm_lang$core$Task$map,
+			function (_p3) {
+				return {ctor: '_Tuple0'};
+			},
+			_elm_lang$core$Task$sequence(
+				A2(
+					_elm_lang$core$List$map,
+					_elm_lang$core$Task$spawnCmd(router),
+					commands)));
+	});
+var _elm_lang$core$Task$toMaybe = function (task) {
+	return A2(
+		_elm_lang$core$Task$onError,
+		A2(_elm_lang$core$Task$map, _elm_lang$core$Maybe$Just, task),
+		function (_p4) {
+			return _elm_lang$core$Task$succeed(_elm_lang$core$Maybe$Nothing);
+		});
+};
+var _elm_lang$core$Task$fromMaybe = F2(
+	function ($default, maybe) {
+		var _p5 = maybe;
+		if (_p5.ctor === 'Just') {
+			return _elm_lang$core$Task$succeed(_p5._0);
+		} else {
+			return _elm_lang$core$Task$fail($default);
+		}
+	});
+var _elm_lang$core$Task$toResult = function (task) {
+	return A2(
+		_elm_lang$core$Task$onError,
+		A2(_elm_lang$core$Task$map, _elm_lang$core$Result$Ok, task),
+		function (msg) {
+			return _elm_lang$core$Task$succeed(
+				_elm_lang$core$Result$Err(msg));
+		});
+};
+var _elm_lang$core$Task$fromResult = function (result) {
+	var _p6 = result;
+	if (_p6.ctor === 'Ok') {
+		return _elm_lang$core$Task$succeed(_p6._0);
+	} else {
+		return _elm_lang$core$Task$fail(_p6._0);
+	}
+};
+var _elm_lang$core$Task$init = _elm_lang$core$Task$succeed(
+	{ctor: '_Tuple0'});
+var _elm_lang$core$Task$onSelfMsg = F3(
+	function (_p9, _p8, _p7) {
+		return _elm_lang$core$Task$succeed(
+			{ctor: '_Tuple0'});
+	});
+var _elm_lang$core$Task$command = _elm_lang$core$Native_Platform.leaf('Task');
+var _elm_lang$core$Task$T = function (a) {
+	return {ctor: 'T', _0: a};
+};
+var _elm_lang$core$Task$perform = F3(
+	function (onFail, onSuccess, task) {
+		return _elm_lang$core$Task$command(
+			_elm_lang$core$Task$T(
+				A2(
+					_elm_lang$core$Task$onError,
+					A2(_elm_lang$core$Task$map, onSuccess, task),
+					function (x) {
+						return _elm_lang$core$Task$succeed(
+							onFail(x));
+					})));
+	});
+var _elm_lang$core$Task$cmdMap = F2(
+	function (tagger, _p10) {
+		var _p11 = _p10;
+		return _elm_lang$core$Task$T(
+			A2(_elm_lang$core$Task$map, tagger, _p11._0));
+	});
+_elm_lang$core$Native_Platform.effectManagers['Task'] = {pkg: 'elm-lang/core', init: _elm_lang$core$Task$init, onEffects: _elm_lang$core$Task$onEffects, onSelfMsg: _elm_lang$core$Task$onSelfMsg, tag: 'cmd', cmdMap: _elm_lang$core$Task$cmdMap};
 
 //import Native.Utils //
 
@@ -3850,13 +4222,21 @@ function endsWith(sub, str)
 function indexes(sub, str)
 {
 	var subLen = sub.length;
+	
+	if (subLen < 1)
+	{
+		return _elm_lang$core$Native_List.Nil;
+	}
+
 	var i = 0;
 	var is = [];
+
 	while ((i = str.indexOf(sub, i)) > -1)
 	{
 		is.push(i);
 		i = i + subLen;
-	}
+	}	
+	
 	return _elm_lang$core$Native_List.fromArray(is);
 }
 
@@ -3985,6 +4365,7 @@ return {
 };
 
 }();
+
 var _elm_lang$core$String$fromList = _elm_lang$core$Native_String.fromList;
 var _elm_lang$core$String$toList = _elm_lang$core$Native_String.toList;
 var _elm_lang$core$String$toFloat = _elm_lang$core$Native_String.toFloat;
@@ -5209,7 +5590,7 @@ function badToString(problem)
 					+ ':\n\n' + problems.join('\n');
 
 			case 'custom':
-				return 'A `customDecode` failed'
+				return 'A `customDecoder` failed'
 					+ (context === '_' ? '' : ' at ' + context)
 					+ ' with the message: ' + problem.msg;
 
@@ -5668,6 +6049,187 @@ var _elm_lang$core$Json_Decode$dict = function (decoder) {
 		_elm_lang$core$Json_Decode$keyValuePairs(decoder));
 };
 var _elm_lang$core$Json_Decode$Decoder = {ctor: 'Decoder'};
+
+var _elm_lang$dom$Native_Dom = function() {
+
+function on(node)
+{
+	return function(eventName, decoder, toTask)
+	{
+		return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+
+			function performTask(event)
+			{
+				var result = A2(_elm_lang$core$Json_Decode$decodeValue, decoder, event);
+				if (result.ctor === 'Ok')
+				{
+					_elm_lang$core$Native_Scheduler.rawSpawn(toTask(result._0));
+				}
+			}
+
+			node.addEventListener(eventName, performTask);
+
+			return function()
+			{
+				node.removeEventListener(eventName, performTask);
+			};
+		});
+	};
+}
+
+var rAF = typeof requestAnimationFrame !== 'undefined'
+	? requestAnimationFrame
+	: function(callback) { callback(); };
+
+function withNode(id, doStuff)
+{
+	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
+	{
+		rAF(function()
+		{
+			var node = document.getElementById(id);
+			if (node === null)
+			{
+				callback(_elm_lang$core$Native_Scheduler.fail({ ctor: 'NotFound', _0: id }));
+				return;
+			}
+			callback(_elm_lang$core$Native_Scheduler.succeed(doStuff(node)));
+		});
+	});
+}
+
+
+// FOCUS
+
+function focus(id)
+{
+	return withNode(id, function(node) {
+		node.focus();
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+function blur(id)
+{
+	return withNode(id, function(node) {
+		node.blur();
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+
+// SCROLLING
+
+function getScrollTop(id)
+{
+	return withNode(id, function(node) {
+		return node.scrollTop;
+	});
+}
+
+function setScrollTop(id, desiredScrollTop)
+{
+	return withNode(id, function(node) {
+		node.scrollTop = desiredScrollTop;
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+function toBottom(id)
+{
+	return withNode(id, function(node) {
+		node.scrollTop = node.scrollHeight;
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+function getScrollLeft(id)
+{
+	return withNode(id, function(node) {
+		return node.scrollLeft;
+	});
+}
+
+function setScrollLeft(id, desiredScrollLeft)
+{
+	return withNode(id, function(node) {
+		node.scrollLeft = desiredScrollLeft;
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+function toRight(id)
+{
+	return withNode(id, function(node) {
+		node.scrollLeft = node.scrollWidth;
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+
+// SIZE
+
+function width(options, id)
+{
+	return withNode(id, function(node) {
+		switch (options.ctor)
+		{
+			case 'Content':
+				return node.scrollWidth;
+			case 'VisibleContent':
+				return node.clientWidth;
+			case 'VisibleContentWithBorders':
+				return node.offsetWidth;
+			case 'VisibleContentWithBordersAndMargins':
+				var rect = node.getBoundingClientRect();
+				return rect.right - rect.left;
+		}
+	});
+}
+
+function height(options, id)
+{
+	return withNode(id, function(node) {
+		switch (options.ctor)
+		{
+			case 'Content':
+				return node.scrollHeight;
+			case 'VisibleContent':
+				return node.clientHeight;
+			case 'VisibleContentWithBorders':
+				return node.offsetHeight;
+			case 'VisibleContentWithBordersAndMargins':
+				var rect = node.getBoundingClientRect();
+				return rect.bottom - rect.top;
+		}
+	});
+}
+
+return {
+	onDocument: F3(on(document)),
+	onWindow: F3(on(window)),
+
+	focus: focus,
+	blur: blur,
+
+	getScrollTop: getScrollTop,
+	setScrollTop: F2(setScrollTop),
+	getScrollLeft: getScrollLeft,
+	setScrollLeft: F2(setScrollLeft),
+	toBottom: toBottom,
+	toRight: toRight,
+
+	height: F2(height),
+	width: F2(width)
+};
+
+}();
+
+var _elm_lang$dom$Dom$blur = _elm_lang$dom$Native_Dom.blur;
+var _elm_lang$dom$Dom$focus = _elm_lang$dom$Native_Dom.focus;
+var _elm_lang$dom$Dom$NotFound = function (a) {
+	return {ctor: 'NotFound', _0: a};
+};
 
 //import Native.Json //
 
@@ -6960,7 +7522,7 @@ function applyPatch(domNode, patch)
 	switch (patch.type)
 	{
 		case 'p-redraw':
-			return redraw(domNode, patch.data, patch.eventNode);
+			return applyPatchRedraw(domNode, patch.data, patch.eventNode);
 
 		case 'p-facts':
 			applyFacts(domNode, patch.eventNode, patch.data);
@@ -7009,57 +7571,7 @@ function applyPatch(domNode, patch)
 			return domNode;
 
 		case 'p-reorder':
-			var data = patch.data;
-
-			// end inserts
-			var endInserts = data.endInserts;
-			var end;
-			if (typeof endInserts !== 'undefined')
-			{
-				if (endInserts.length === 1)
-				{
-					var insert = endInserts[0];
-					var entry = insert.entry;
-					var end = entry.tag === 'move'
-						? entry.data
-						: render(entry.vnode, patch.eventNode);
-				}
-				else
-				{
-					end = document.createDocumentFragment();
-					for (var i = 0; i < endInserts.length; i++)
-					{
-						var insert = endInserts[i];
-						var entry = insert.entry;
-						var node = entry.tag === 'move'
-							? entry.data
-							: render(entry.vnode, patch.eventNode);
-						end.appendChild(node);
-					}
-				}
-			}
-
-			// removals
-			domNode = applyPatchesHelp(domNode, data.patches);
-
-			// inserts
-			var inserts = data.inserts;
-			for (var i = 0; i < inserts.length; i++)
-			{
-				var insert = inserts[i];
-				var entry = insert.entry;
-				var node = entry.tag === 'move'
-					? entry.data
-					: render(entry.vnode, patch.eventNode);
-				domNode.insertBefore(node, domNode.childNodes[insert.index]);
-			}
-
-			if (typeof end !== 'undefined')
-			{
-				domNode.appendChild(end);
-			}
-
-			return domNode;
+			return applyPatchReorder(domNode, patch);
 
 		case 'p-custom':
 			var impl = patch.data;
@@ -7071,7 +7583,7 @@ function applyPatch(domNode, patch)
 }
 
 
-function redraw(domNode, vNode, eventNode)
+function applyPatchRedraw(domNode, vNode, eventNode)
 {
 	var parentNode = domNode.parentNode;
 	var newNode = render(vNode, eventNode);
@@ -7086,6 +7598,59 @@ function redraw(domNode, vNode, eventNode)
 		parentNode.replaceChild(newNode, domNode);
 	}
 	return newNode;
+}
+
+
+function applyPatchReorder(domNode, patch)
+{
+	var data = patch.data;
+
+	// remove end inserts
+	var frag = applyPatchReorderEndInsertsHelp(data.endInserts, patch);
+
+	// removals
+	domNode = applyPatchesHelp(domNode, data.patches);
+
+	// inserts
+	var inserts = data.inserts;
+	for (var i = 0; i < inserts.length; i++)
+	{
+		var insert = inserts[i];
+		var entry = insert.entry;
+		var node = entry.tag === 'move'
+			? entry.data
+			: render(entry.vnode, patch.eventNode);
+		domNode.insertBefore(node, domNode.childNodes[insert.index]);
+	}
+
+	// add end inserts
+	if (typeof frag !== 'undefined')
+	{
+		domNode.appendChild(frag);
+	}
+
+	return domNode;
+}
+
+
+function applyPatchReorderEndInsertsHelp(endInserts, patch)
+{
+	if (typeof endInserts === 'undefined')
+	{
+		return;
+	}
+
+	var frag = document.createDocumentFragment();
+	for (var i = 0; i < endInserts.length; i++)
+	{
+		var insert = endInserts[i];
+		var entry = insert.entry;
+		frag.appendChild(entry.tag === 'move'
+			? entry.data
+			: render(entry.vnode, patch.eventNode)
+		);
+	}
+	return frag;
 }
 
 
@@ -7761,12 +8326,6 @@ var _user$project$Todo$margin15Style = _elm_lang$html$Html_Attributes$style(
 		[
 			{ctor: '_Tuple2', _0: 'margin-left', _1: '15px'}
 		]));
-var _user$project$Todo$myStyle = _elm_lang$html$Html_Attributes$style(
-	_elm_lang$core$Native_List.fromArray(
-		[
-			{ctor: '_Tuple2', _0: 'width', _1: '80%'},
-			{ctor: '_Tuple2', _0: 'margin-left', _1: '15px'}
-		]));
 var _user$project$Todo$updateModelUniversalId = function (model) {
 	return _elm_lang$core$Native_Utils.update(
 		model,
@@ -7793,9 +8352,9 @@ var _user$project$Todo$updateChildrenVisibleField = function (todo) {
 			childrenVisible: _elm_lang$core$Basics$not(todo.childrenVisible)
 		});
 };
-var _user$project$Todo$Todo = F5(
-	function (a, b, c, d, e) {
-		return {id: a, description: b, completed: c, childrenVisible: d, children: e};
+var _user$project$Todo$Todo = F6(
+	function (a, b, c, d, e, f) {
+		return {id: a, description: b, completed: c, childrenVisible: d, children: e, editing: f};
 	});
 var _user$project$Todo$Model = F3(
 	function (a, b, c) {
@@ -7813,7 +8372,8 @@ var _user$project$Todo$newEntry = F2(
 			childrenVisible: true,
 			children: _user$project$Todo$TodoChildren(
 				_elm_lang$core$Native_List.fromArray(
-					[]))
+					[])),
+			editing: false
 		};
 	});
 var _user$project$Todo$getLastTodoFromList = function (_p0) {
@@ -7834,14 +8394,33 @@ var _user$project$Todo$emptyModel = {
 	uid: 0
 };
 var _user$project$Todo$init = {ctor: '_Tuple2', _0: _user$project$Todo$emptyModel, _1: _elm_lang$core$Platform_Cmd$none};
-var _user$project$Todo$toggleChildrenVisibleField = F2(
-	function (_p3, todoId) {
+var _user$project$Todo$setTodoEditingToValue = F3(
+	function (_p3, todoId, isEditing) {
 		var _p4 = _p3;
+		var setTodoEditingField = function (todo) {
+			return _elm_lang$core$Native_Utils.eq(todo.id, todoId) ? _elm_lang$core$Native_Utils.update(
+				todo,
+				{editing: isEditing}) : A3(_user$project$Todo$recursiveSetTodoEditingToValue, todo, todoId, isEditing);
+		};
+		return _user$project$Todo$TodoChildren(
+			A2(_elm_lang$core$List$map, setTodoEditingField, _p4._0));
+	});
+var _user$project$Todo$recursiveSetTodoEditingToValue = F3(
+	function (todo, todoId, isEditing) {
+		return _elm_lang$core$Native_Utils.update(
+			todo,
+			{
+				children: A3(_user$project$Todo$setTodoEditingToValue, todo.children, todoId, isEditing)
+			});
+	});
+var _user$project$Todo$toggleChildrenVisibleField = F2(
+	function (_p5, todoId) {
+		var _p6 = _p5;
 		var toggleChildrenVisible = function (todo) {
 			return _elm_lang$core$Native_Utils.eq(todo.id, todoId) ? _user$project$Todo$updateChildrenVisibleField(todo) : A2(_user$project$Todo$recursiveUpdateChildrenVisibleField, todo, todoId);
 		};
 		return _user$project$Todo$TodoChildren(
-			A2(_elm_lang$core$List$map, toggleChildrenVisible, _p4._0));
+			A2(_elm_lang$core$List$map, toggleChildrenVisible, _p6._0));
 	});
 var _user$project$Todo$recursiveUpdateChildrenVisibleField = F2(
 	function (todo, todoId) {
@@ -7860,20 +8439,20 @@ var _user$project$Todo$toggleShowChildrenVisibleField = F2(
 			});
 	});
 var _user$project$Todo$addEmptyTodoChildToChildrenList = F2(
-	function (_p5, newTodoId) {
-		var _p6 = _p5;
+	function (_p7, newTodoId) {
+		var _p8 = _p7;
 		return _user$project$Todo$TodoChildren(
 			A2(
 				_elm_lang$core$Basics_ops['++'],
-				_p6._0,
+				_p8._0,
 				_elm_lang$core$Native_List.fromArray(
 					[
 						A2(_user$project$Todo$newEntry, '', newTodoId)
 					])));
 	});
 var _user$project$Todo$addNewTodoToChildrenList = F3(
-	function (_p7, parentTodoId, newTodoId) {
-		var _p8 = _p7;
+	function (_p9, parentTodoId, newTodoId) {
+		var _p10 = _p9;
 		var createChildTodo = function (todo) {
 			return _elm_lang$core$Native_Utils.eq(todo.id, parentTodoId) ? _elm_lang$core$Native_Utils.update(
 				todo,
@@ -7882,7 +8461,7 @@ var _user$project$Todo$addNewTodoToChildrenList = F3(
 				}) : A3(_user$project$Todo$recursiveAddNewTodoItem, todo, parentTodoId, newTodoId);
 		};
 		return _user$project$Todo$TodoChildren(
-			A2(_elm_lang$core$List$map, createChildTodo, _p8._0));
+			A2(_elm_lang$core$List$map, createChildTodo, _p10._0));
 	});
 var _user$project$Todo$recursiveAddNewTodoItem = F3(
 	function (todo, parentTodoId, newTodoId) {
@@ -7902,13 +8481,13 @@ var _user$project$Todo$createNewChildForTodo = F2(
 			});
 	});
 var _user$project$Todo$updateTodochildDesc = F3(
-	function (_p9, todoId, newDesc) {
-		var _p10 = _p9;
+	function (_p11, todoId, newDesc) {
+		var _p12 = _p11;
 		var updateTodoDesc = function (todo) {
 			return _elm_lang$core$Native_Utils.eq(todo.id, todoId) ? A2(_user$project$Todo$updateTodoItemDescription, todo, newDesc) : A3(_user$project$Todo$recursiveUpdateSingleTodoDesc, todo, todoId, newDesc);
 		};
 		return _user$project$Todo$TodoChildren(
-			A2(_elm_lang$core$List$map, updateTodoDesc, _p10._0));
+			A2(_elm_lang$core$List$map, updateTodoDesc, _p12._0));
 	});
 var _user$project$Todo$recursiveUpdateSingleTodoDesc = F3(
 	function (todoItem, todoId, newDesc) {
@@ -7927,14 +8506,14 @@ var _user$project$Todo$updateTodoModelDesc = F3(
 			});
 	});
 var _user$project$Todo$deleteTodoFromList = F2(
-	function (_p11, todoToDeleteId) {
-		var _p12 = _p11;
+	function (_p13, todoToDeleteId) {
+		var _p14 = _p13;
 		var removeTodo = function (todo) {
 			return _elm_lang$core$Native_Utils.eq(todo.id, todoToDeleteId) ? _elm_lang$core$Maybe$Nothing : _elm_lang$core$Maybe$Just(
 				A2(_user$project$Todo$recursiveDeleteTodo, todo, todoToDeleteId));
 		};
 		return _user$project$Todo$TodoChildren(
-			A2(_elm_lang$core$List$filterMap, removeTodo, _p12._0));
+			A2(_elm_lang$core$List$filterMap, removeTodo, _p14._0));
 	});
 var _user$project$Todo$recursiveDeleteTodo = F2(
 	function (todo, todoToDeleteId) {
@@ -7953,13 +8532,13 @@ var _user$project$Todo$deleteTodoFromModel = F2(
 			});
 	});
 var _user$project$Todo$recursiveSetTodoChildrenToComplete = F2(
-	function (_p13, isTodoCompleted) {
-		var _p14 = _p13;
+	function (_p15, isTodoCompleted) {
+		var _p16 = _p15;
 		var markTodoAsComplete = function (todo) {
 			return A2(_user$project$Todo$toggleSetTodoComplete, todo, isTodoCompleted);
 		};
 		return _user$project$Todo$TodoChildren(
-			A2(_elm_lang$core$List$map, markTodoAsComplete, _p14._0));
+			A2(_elm_lang$core$List$map, markTodoAsComplete, _p16._0));
 	});
 var _user$project$Todo$toggleSetTodoComplete = F2(
 	function (todo, isTodoCompleted) {
@@ -7971,8 +8550,8 @@ var _user$project$Todo$toggleSetTodoComplete = F2(
 			});
 	});
 var _user$project$Todo$toggleCompletedTodoStatus = F2(
-	function (_p15, completedTodoId) {
-		var _p16 = _p15;
+	function (_p17, completedTodoId) {
+		var _p18 = _p17;
 		var markTodoAsComplete = function (todo) {
 			return _elm_lang$core$Native_Utils.eq(todo.id, completedTodoId) ? A2(
 				_user$project$Todo$toggleSetTodoComplete,
@@ -7980,7 +8559,7 @@ var _user$project$Todo$toggleCompletedTodoStatus = F2(
 				_elm_lang$core$Basics$not(todo.completed)) : A2(_user$project$Todo$recursiveFindCompletedTodo, todo, completedTodoId);
 		};
 		return _user$project$Todo$TodoChildren(
-			A2(_elm_lang$core$List$map, markTodoAsComplete, _p16._0));
+			A2(_elm_lang$core$List$map, markTodoAsComplete, _p18._0));
 	});
 var _user$project$Todo$recursiveFindCompletedTodo = F2(
 	function (todo, completedTodoId) {
@@ -7999,12 +8578,12 @@ var _user$project$Todo$toggleTodoCompletedField = F2(
 			});
 	});
 var _user$project$Todo$addToTodoChild = F3(
-	function (_p17, newTodoText, newTodoVal) {
-		var _p18 = _p17;
+	function (_p19, newTodoText, newTodoVal) {
+		var _p20 = _p19;
 		return _user$project$Todo$TodoChildren(
 			A2(
 				_elm_lang$core$Basics_ops['++'],
-				_p18._0,
+				_p20._0,
 				_elm_lang$core$Native_List.fromArray(
 					[
 						A2(_user$project$Todo$newEntry, newTodoText, newTodoVal)
@@ -8022,69 +8601,9 @@ var _user$project$Todo$addTodo = function (model) {
 		_user$project$Todo$updateModelUniversalId(
 			_user$project$Todo$addNewTodoItemToModel(model)));
 };
-var _user$project$Todo$update = F2(
-	function (msg, model) {
-		var _p19 = msg;
-		switch (_p19.ctor) {
-			case 'NoOp':
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					model,
-					_elm_lang$core$Native_List.fromArray(
-						[]));
-			case 'Add':
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					_user$project$Todo$addTodo(model),
-					_elm_lang$core$Native_List.fromArray(
-						[]));
-			case 'UpdateTodo':
-				return {
-					ctor: '_Tuple2',
-					_0: A3(_user$project$Todo$updateTodoModelDesc, model, _p19._0, _p19._1),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'UpdateField':
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					_elm_lang$core$Native_Utils.update(
-						model,
-						{field: _p19._0}),
-					_elm_lang$core$Native_List.fromArray(
-						[]));
-			case 'AddChildTodo':
-				return {
-					ctor: '_Tuple2',
-					_0: A2(_user$project$Todo$createNewChildForTodo, model, _p19._0),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'DeleteTodo':
-				return {
-					ctor: '_Tuple2',
-					_0: A2(_user$project$Todo$deleteTodoFromModel, model, _p19._0),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'ToggleTodoCompleted':
-				return {
-					ctor: '_Tuple2',
-					_0: A2(_user$project$Todo$toggleTodoCompletedField, model, _p19._0),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			default:
-				return _elm_lang$core$Native_Utils.eq(
-					_p19._0,
-					_user$project$Todo$TodoChildren(
-						_elm_lang$core$Native_List.fromArray(
-							[]))) ? A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					model,
-					_elm_lang$core$Native_List.fromArray(
-						[])) : {
-					ctor: '_Tuple2',
-					_0: A2(_user$project$Todo$toggleShowChildrenVisibleField, model, _p19._1),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-		}
+var _user$project$Todo$EditingEntry = F2(
+	function (a, b) {
+		return {ctor: 'EditingEntry', _0: a, _1: b};
 	});
 var _user$project$Todo$ToggleShowChildTodos = F2(
 	function (a, b) {
@@ -8108,6 +8627,96 @@ var _user$project$Todo$UpdateTodo = F2(
 	});
 var _user$project$Todo$Add = {ctor: 'Add'};
 var _user$project$Todo$NoOp = {ctor: 'NoOp'};
+var _user$project$Todo$update = F2(
+	function (msg, model) {
+		var _p21 = msg;
+		switch (_p21.ctor) {
+			case 'NoOp':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					model,
+					_elm_lang$core$Native_List.fromArray(
+						[]));
+			case 'Add':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_user$project$Todo$addTodo(model),
+					_elm_lang$core$Native_List.fromArray(
+						[]));
+			case 'UpdateTodo':
+				return {
+					ctor: '_Tuple2',
+					_0: A3(_user$project$Todo$updateTodoModelDesc, model, _p21._0, _p21._1),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'UpdateField':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{field: _p21._0}),
+					_elm_lang$core$Native_List.fromArray(
+						[]));
+			case 'AddChildTodo':
+				return {
+					ctor: '_Tuple2',
+					_0: A2(_user$project$Todo$createNewChildForTodo, model, _p21._0),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'DeleteTodo':
+				return {
+					ctor: '_Tuple2',
+					_0: A2(_user$project$Todo$deleteTodoFromModel, model, _p21._0),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'ToggleTodoCompleted':
+				return {
+					ctor: '_Tuple2',
+					_0: A2(_user$project$Todo$toggleTodoCompletedField, model, _p21._0),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'ToggleShowChildTodos':
+				return _elm_lang$core$Native_Utils.eq(
+					_p21._0,
+					_user$project$Todo$TodoChildren(
+						_elm_lang$core$Native_List.fromArray(
+							[]))) ? A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					model,
+					_elm_lang$core$Native_List.fromArray(
+						[])) : {
+					ctor: '_Tuple2',
+					_0: A2(_user$project$Todo$toggleShowChildrenVisibleField, model, _p21._1),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				var _p24 = _p21._0;
+				var focus = _elm_lang$dom$Dom$focus(
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						'todo-',
+						_elm_lang$core$Basics$toString(_p24)));
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							entries: A3(_user$project$Todo$setTodoEditingToValue, model.entries, _p24, _p21._1)
+						}),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							A3(
+							_elm_lang$core$Task$perform,
+							function (_p22) {
+								return _user$project$Todo$NoOp;
+							},
+							function (_p23) {
+								return _user$project$Todo$NoOp;
+							},
+							focus)
+						]));
+		}
+	});
 var _user$project$Todo$onEnter = function (msg) {
 	var tagger = function (code) {
 		return _elm_lang$core$Native_Utils.eq(code, 13) ? msg : _user$project$Todo$NoOp;
@@ -8179,12 +8788,6 @@ var _user$project$Todo$displaySingleTodo = function (todo) {
 	var showChildren = function (areChildrenVisible) {
 		return areChildrenVisible ? '' : 'hideChildren';
 	};
-	var isChecked = function (todoCompleted) {
-		return todoCompleted;
-	};
-	var isCompleted = function (todoCompleted) {
-		return todoCompleted ? 'completed' : '';
-	};
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
@@ -8194,72 +8797,124 @@ var _user$project$Todo$displaySingleTodo = function (todo) {
 				A2(
 				_elm_lang$html$Html_Attributes$attribute,
 				'id',
-				_elm_lang$core$Basics$toString(todo.id))
+				_elm_lang$core$Basics$toString(todo.id)),
+				_elm_lang$html$Html_Attributes$class('todoParentContainer'),
+				_elm_lang$html$Html_Attributes$classList(
+				_elm_lang$core$Native_List.fromArray(
+					[
+						{ctor: '_Tuple2', _0: 'editing', _1: todo.editing},
+						{ctor: '_Tuple2', _0: 'completed', _1: todo.completed}
+					]))
 			]),
 		_elm_lang$core$Native_List.fromArray(
 			[
 				A2(
-				_elm_lang$html$Html$button,
+				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html_Events$onClick(
-						A2(_user$project$Todo$ToggleShowChildTodos, todo.children, todo.id)),
-						_elm_lang$html$Html_Attributes$title('Minimize')
+						_elm_lang$html$Html_Attributes$class('todoDetailsContainer')
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html$text(
-						toggleMinimizeText(todo.childrenVisible))
+						A2(
+						_elm_lang$html$Html$div,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('todoControls')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								A2(
+								_elm_lang$html$Html$button,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html_Events$onClick(
+										A2(_user$project$Todo$ToggleShowChildTodos, todo.children, todo.id)),
+										_elm_lang$html$Html_Attributes$title('Minimize')
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html$text(
+										toggleMinimizeText(todo.childrenVisible))
+									])),
+								A2(
+								_elm_lang$html$Html$button,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_user$project$Todo$margin15Style,
+										_elm_lang$html$Html_Events$onClick(
+										_user$project$Todo$DeleteTodo(todo.id)),
+										_elm_lang$html$Html_Attributes$title('Delete')
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html$text('X')
+									])),
+								A2(
+								_elm_lang$html$Html$input,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_user$project$Todo$margin15Style,
+										_elm_lang$html$Html_Attributes$type$('checkbox'),
+										_elm_lang$html$Html_Attributes$checked(todo.completed),
+										_elm_lang$html$Html_Events$onClick(
+										_user$project$Todo$ToggleTodoCompleted(todo.id))
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[]))
+							])),
+						A2(
+						_elm_lang$html$Html$div,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('view')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								A2(
+								_elm_lang$html$Html$label,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html_Events$onClick(
+										A2(_user$project$Todo$EditingEntry, todo.id, true))
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html$text(todo.description)
+									]))
+							])),
+						A2(
+						_elm_lang$html$Html$input,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('edit'),
+								_elm_lang$html$Html_Attributes$placeholder('New todo'),
+								_elm_lang$html$Html_Attributes$id(
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									'todo-',
+									_elm_lang$core$Basics$toString(todo.id))),
+								_user$project$Todo$onEnter(
+								_user$project$Todo$AddChildTodo(todo.id)),
+								_elm_lang$html$Html_Events$onInput(
+								_user$project$Todo$UpdateTodo(todo.id)),
+								_elm_lang$html$Html_Events$onBlur(
+								A2(_user$project$Todo$EditingEntry, todo.id, false)),
+								_elm_lang$html$Html_Attributes$value(todo.description)
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[]))
 					])),
-				A2(
-				_elm_lang$html$Html$button,
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_user$project$Todo$margin15Style,
-						_elm_lang$html$Html_Events$onClick(
-						_user$project$Todo$DeleteTodo(todo.id)),
-						_elm_lang$html$Html_Attributes$title('Delete')
-					]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text('X')
-					])),
-				A2(
-				_elm_lang$html$Html$input,
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_user$project$Todo$margin15Style,
-						_elm_lang$html$Html_Attributes$type$('checkbox'),
-						_elm_lang$html$Html_Attributes$checked(
-						isChecked(todo.completed)),
-						_elm_lang$html$Html_Events$onClick(
-						_user$project$Todo$ToggleTodoCompleted(todo.id))
-					]),
-				_elm_lang$core$Native_List.fromArray(
-					[])),
-				A2(
-				_elm_lang$html$Html$input,
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_user$project$Todo$myStyle,
-						_elm_lang$html$Html_Attributes$class(
-						isCompleted(todo.completed)),
-						_elm_lang$html$Html_Attributes$placeholder('New todo'),
-						_user$project$Todo$onEnter(
-						_user$project$Todo$AddChildTodo(todo.id)),
-						_elm_lang$html$Html_Events$onInput(
-						_user$project$Todo$UpdateTodo(todo.id)),
-						_elm_lang$html$Html_Attributes$value(todo.description)
-					]),
-				_elm_lang$core$Native_List.fromArray(
-					[])),
 				A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
 					[
 						_user$project$Todo$margin15Style,
 						_elm_lang$html$Html_Attributes$class(
-						showChildren(todo.childrenVisible))
+						A2(
+							_elm_lang$core$String$append,
+							'todoChildContainer ',
+							showChildren(todo.childrenVisible)))
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[
@@ -8267,13 +8922,13 @@ var _user$project$Todo$displaySingleTodo = function (todo) {
 					]))
 			]));
 };
-var _user$project$Todo$displayTodoList = function (_p20) {
-	var _p21 = _p20;
+var _user$project$Todo$displayTodoList = function (_p25) {
+	var _p26 = _p25;
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
 			[]),
-		A2(_elm_lang$core$List$map, _user$project$Todo$displaySingleTodo, _p21._0));
+		A2(_elm_lang$core$List$map, _user$project$Todo$displaySingleTodo, _p26._0));
 };
 var _user$project$Todo$view = function (model) {
 	return A2(

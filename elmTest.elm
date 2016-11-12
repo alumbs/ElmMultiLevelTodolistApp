@@ -7,6 +7,8 @@ import Html.Events exposing (..)
 import Json.Decode as Json
 import String
 import Array
+import Task
+import Dom
 
 main =
   App.program
@@ -24,6 +26,7 @@ type alias Todo =
     , completed: Bool
     , childrenVisible: Bool
     , children: TodoChildren
+    , editing: Bool
     }
 
 type TodoChildren = TodoChildren (List Todo)
@@ -39,6 +42,7 @@ newEntry str newId =
     , completed = False
     , childrenVisible = True
     , children = (TodoChildren [])
+    , editing = False
   }
 
 -- type TodoList = TodoList (List Todo)
@@ -74,6 +78,7 @@ type Msg
   | DeleteTodo Int
   | ToggleTodoCompleted Int
   | ToggleShowChildTodos TodoChildren Int
+  | EditingEntry Int Bool
   -- | NewFace Int
 
 
@@ -107,8 +112,41 @@ update msg model =
     else
       ((toggleShowChildrenVisibleField model todoId) , Cmd.none)
 
+   EditingEntry id isEditing ->
+      let
+          focus =
+              Dom.focus ("todo-" ++ toString id)
+      in
+          { 
+            model 
+            | entries = setTodoEditingToValue model.entries id isEditing 
+          }
+          ! [ Task.perform (\_ -> NoOp) (\_ -> NoOp) focus ]
+
 
 --FUNCTIONS
+setTodoEditingToValue : TodoChildren -> Int -> Bool -> TodoChildren
+setTodoEditingToValue (TodoChildren todolist) todoId isEditing =
+  let
+    setTodoEditingField todo =
+      if todo.id == todoId then
+        {
+          todo
+          | editing = isEditing
+        }
+      else
+        recursiveSetTodoEditingToValue todo todoId isEditing
+  in
+    (TodoChildren (List.map setTodoEditingField todolist))
+
+recursiveSetTodoEditingToValue : Todo -> Int -> Bool -> Todo
+recursiveSetTodoEditingToValue todo todoId isEditing =
+  {
+    todo
+    | children = (setTodoEditingToValue todo.children todoId isEditing)
+  }
+
+
 toggleShowChildrenVisibleField : Model -> Int -> Model
 toggleShowChildrenVisibleField model todoId =
   {
@@ -382,15 +420,6 @@ displayTodoList (TodoChildren todoList) =
 displaySingleTodo : Todo -> Html Msg
 displaySingleTodo todo =
   let
-    isCompleted todoCompleted =
-      if todoCompleted then
-        "completed"
-      else
-        ""
-
-    isChecked todoCompleted =
-      todoCompleted
-
     showChildren areChildrenVisible =
       if areChildrenVisible then
         ""
@@ -407,48 +436,71 @@ displaySingleTodo todo =
     [
       margin15Style 
       , marginHalfemTopStyle
-      , attribute "id" (toString todo.id) 
+      , attribute "id" (toString todo.id)
+      , class "todoParentContainer"
+      , classList [ ("editing", todo.editing), ("completed", todo.completed)]
     ] --style [("margin-left", "15px;")] ]
     [ 
-      button
+      div
+      [ 
+        class "todoDetailsContainer"
+      ]
+      [
+        div
+        [class "todoControls"]
         [
-          onClick (ToggleShowChildTodos todo.children todo.id)
-          , title "Minimize"
+          button
+          [
+            onClick (ToggleShowChildTodos todo.children todo.id)
+            , title "Minimize"
+          ]
+          [
+            text (toggleMinimizeText todo.childrenVisible)
+          ]
+          , button
+            [
+              margin15Style
+              , onClick (DeleteTodo todo.id) 
+              , title "Delete"
+            ]
+            [
+              text "X"
+            ]
+          , input
+            [ 
+              margin15Style
+              , type' "checkbox"
+              , checked (todo.completed )
+              , onClick (ToggleTodoCompleted todo.id) 
+            ]
+            [] 
         ]
-        [
-          text (toggleMinimizeText todo.childrenVisible)
-        ]
-      , button
-        [
-          margin15Style
-          , onClick (DeleteTodo todo.id) 
-          , title "Delete"
-        ]
-        [
-          text "X"
-        ]
-      , input
-        [ 
-          margin15Style
-          , type' "checkbox"
-          , checked (isChecked todo.completed)
-          , onClick (ToggleTodoCompleted todo.id) 
-        ]
-        []
-      , input
-        [
-          myStyle          
-          , class (isCompleted todo.completed) 
-          , placeholder "New todo"
-          , onEnter (AddChildTodo todo.id)
-          , onInput (UpdateTodo todo.id)
-          , value todo.description
-        ]
-        []
+        , div
+          [class "view"]
+          [
+            label
+              [onClick (EditingEntry todo.id True)] 
+              [text todo.description]
+          ]
+        , input
+          [
+            -- myStyle          
+            class "edit"
+            , placeholder "New todo"
+            , id ("todo-" ++ toString todo.id)
+            , onEnter (AddChildTodo todo.id)
+            , onInput (UpdateTodo todo.id)
+            , onBlur (EditingEntry todo.id False)
+            , value todo.description
+          ]
+          [] 
+      ] 
       , div 
         [ 
           margin15Style
-          , class (showChildren todo.childrenVisible) 
+          , class ( String.append "todoChildContainer " (showChildren todo.childrenVisible) )
+          -- , class "todoChildContainer" 
+          -- , classList [("hideChildren", not todo.childrenVisible)] 
         ] --style [("margin-left", "15px;")] ]
         [
           displayTodoList todo.children
@@ -466,12 +518,12 @@ view model =
 
 
 --STLYES
-myStyle : Attribute Msg
-myStyle =
- style[
-   ("width", "80%")
-   , ("margin-left", "15px")
- ]
+-- myStyle : Attribute Msg
+-- myStyle =
+--  style[
+--    ("width", "80%")
+--    , ("margin-left", "15px")
+--  ]
 
 margin15Style : Attribute Msg
 margin15Style = 
