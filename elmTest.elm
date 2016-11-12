@@ -437,8 +437,7 @@ displaySingleTodo todo =
       margin15Style 
       , marginHalfemTopStyle
       , attribute "id" (toString todo.id)
-      , class "todoParentContainer"
-      , classList [ ("editing", todo.editing), ("completed", todo.completed)]
+      , classList [ ("editing", todo.editing), ("completed", todo.completed), ("todoParentContainer", True)]
     ] --style [("margin-left", "15px;")] ]
     [ 
       div

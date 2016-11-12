@@ -8798,12 +8798,12 @@ var _user$project$Todo$displaySingleTodo = function (todo) {
 				_elm_lang$html$Html_Attributes$attribute,
 				'id',
 				_elm_lang$core$Basics$toString(todo.id)),
-				_elm_lang$html$Html_Attributes$class('todoParentContainer'),
 				_elm_lang$html$Html_Attributes$classList(
 				_elm_lang$core$Native_List.fromArray(
 					[
 						{ctor: '_Tuple2', _0: 'editing', _1: todo.editing},
-						{ctor: '_Tuple2', _0: 'completed', _1: todo.completed}
+						{ctor: '_Tuple2', _0: 'completed', _1: todo.completed},
+						{ctor: '_Tuple2', _0: 'todoParentContainer', _1: true}
 					]))
 			]),
 		_elm_lang$core$Native_List.fromArray(
