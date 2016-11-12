@@ -106,8 +106,8 @@ displaySingleTodo todo =
             class "edit"
             , placeholder "New todo"
             , id ("todo-" ++ toString todo.id)
-            -- , onCtrlEnter (AddChildTodo todo.parentId)
-            , onEnter (AddChildTodo todo.id)
+            -- , onCtrlEnter (AddSiblingTodo todo.id)
+            , onEnter (AddChildTodo todo)
             , onInput (UpdateTodo todo.id)
             , value todo.description
           ]
@@ -123,6 +123,38 @@ displaySingleTodo todo =
         ]
     ]
 
+displayFooter : Html Msg
+displayFooter = 
+   footer
+   []
+   [
+        section
+        []
+        [
+            header
+            []
+            [
+                text "Some tips are shown below"
+            ]
+            ,   ul
+                []
+                [
+                    li
+                    []
+                    [
+                        text "press Enter to create a new todo on the next level"
+                    ]
+                    ,   li
+                        []
+                        [
+                            text "press Ctrl+Enter to create a new todo on the same level"
+                        ]
+                ]
+        ]
+        
+
+   ]
+
 -- VIEW
 view : Model -> Html Msg
 view model =
@@ -130,6 +162,7 @@ view model =
      [ 
        showRootView model.field
        , displayTodoList model.entries
+       , displayFooter
      ]
 
 

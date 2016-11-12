@@ -6,8 +6,9 @@ import Todo.Types exposing (..)
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
-    -- Sub.batch
-    --     [ Keyboard.downs KeyCode
-    --     , Keyboard.ups KeyCode
-    --     ]
+    -- Sub.none
+    Sub.batch
+    [ 
+        Keyboard.downs KeyDown
+        , Keyboard.ups KeyUp
+    ]

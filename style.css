@@ -86,3 +86,21 @@ div.view > label
     display: inline-block;
     border: 2px groove #E2FAFF;
 }
+
+/*Footer styles*/
+footer
+{
+    margin-top: 2em;    
+}
+
+footer > section
+{
+    background-color: #4dc3ff;
+    padding: 10px;
+    font-size: 18px;
+}
+
+footer > section > header
+{
+    font-weight: bold;
+}

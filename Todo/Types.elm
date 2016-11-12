@@ -9,6 +9,7 @@ type alias Todo =
     , completed: Bool
     , childrenVisible: Bool
     , children: TodoChildren
+    , parentId : Int
     }
 
 type TodoChildren = TodoChildren (List Todo)
@@ -18,7 +19,7 @@ type alias Model =
    entries : TodoChildren--List Todo
    , field: String
    , uid : Int
---    , keysPressed : KeyDowns
+   , keysDown : List Keyboard.KeyCode
  }
 
 type Msg
@@ -26,8 +27,9 @@ type Msg
   | Add
   | UpdateTodo Int String
   | UpdateField String
-  | AddChildTodo Int
+  | AddChildTodo Todo
   | DeleteTodo Int
   | ToggleTodoCompleted Int
   | ToggleShowChildTodos TodoChildren Int
-  
+  | KeyDown KeyCode
+  | KeyUp KeyCode

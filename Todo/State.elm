@@ -2,7 +2,6 @@ module Todo.State exposing (init, update)
 
 import Todo.Types exposing (..)
 -- import Todo.Key exposing (..)
--- import Todo.Functions exposing (..)
 import String
 import Keyboard exposing (..)
 -- import Set exposing (Set)
@@ -16,52 +15,106 @@ init =
 emptyModel : Model
 emptyModel = 
  {
-   entries = (TodoChildren [])
+   entries = (TodoChildren [(newRootTodo "" 0)])
    , field = ""
-   , uid = 0
---    , keysPressed = Set.empty
+   , uid = 1
+   , keysDown = []
  }
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = 
  case msg of
-   NoOp ->
-    model ! []
+    NoOp ->
+        model ! []
 
-   Add -> 
-    (addTodo model) ! [] --Model "new" 1)
+    Add -> 
+        (addTodo model) ! []
 
-   UpdateTodo id newDescription ->
-    ((updateTodoModelDesc model id newDescription), Cmd.none )
+    UpdateTodo id newDescription ->
+        ((updateTodoModelDesc model id newDescription), Cmd.none )
 
-   UpdateField str  ->
-    { model | field = str } ! []
+    UpdateField str  ->
+        { model | field = str } ! []
 
-   AddChildTodo todoId ->
-    ((createNewChildForTodo model todoId), Cmd.none)
+    AddChildTodo todo ->     
+        if checkCtrlKeyDown model.keysDown then
+            --Create sibling todo
+            ((createSiblingTodo model todo.parentId), Cmd.none)
+        else
+            ((createNewChildForTodo model todo.id), Cmd.none)
 
-   DeleteTodo todoId ->
-    ((deleteTodoFromModel model todoId), Cmd.none)
+    DeleteTodo todoId ->
+        ((deleteTodoFromModel model todoId), Cmd.none)
 
-   ToggleTodoCompleted todoId ->
-    ((toggleTodoCompletedField model todoId) , Cmd.none)
+    ToggleTodoCompleted todoId ->
+        ((toggleTodoCompletedField model todoId) , Cmd.none)
 
-   ToggleShowChildTodos todolist todoId ->
-    if todolist == (TodoChildren []) then
-      model ! []
+    ToggleShowChildTodos todolist todoId ->
+        if todolist == (TodoChildren []) then
+        model ! []
+        else
+        ((toggleShowChildrenVisibleField model todoId) , Cmd.none)
+
+    KeyDown key ->
+        {model | keysDown = addKey key model.keysDown} ! []
+
+    KeyUp key ->
+        {model | keysDown = removeKey key model.keysDown} ! []
+
+
+createSiblingTodo : Model -> Int -> Model
+createSiblingTodo model parentTodoId =
+    case parentTodoId of
+      -1 ->
+        createNewRootChild model
+      _ ->
+        createNewChildForTodo model parentTodoId
+
+createNewRootChild : Model -> Model  
+createNewRootChild model =
+    {
+        model
+        | uid = incrementUid model.uid
+        , entries = addToTodoChild model.entries "" model.uid
+    }
+
+addKey : Keyboard.KeyCode -> List Keyboard.KeyCode -> List Keyboard.KeyCode
+addKey key keysDown =
+  if List.member key keysDown
+    then keysDown
+    else key :: keysDown
+
+removeKey : Keyboard.KeyCode -> List Keyboard.KeyCode -> List Keyboard.KeyCode
+removeKey key keysDown =
+  List.filter (\k -> k /= key) keysDown
+
+checkCtrlKeyDown : List Keyboard.KeyCode -> Bool
+checkCtrlKeyDown codelist =
+    if List.member 17 codelist then
+        True 
     else
-      ((toggleShowChildrenVisibleField model todoId) , Cmd.none)
+        False
 
-
-
-newEntry: String -> Int -> Todo
-newEntry str newId =
+newEntry: String -> Int -> Int -> Todo
+newEntry str newId parentTodoId =
   {
       id = newId
     , description = str
     , completed = False
     , childrenVisible = True
     , children = (TodoChildren [])
+    , parentId = parentTodoId
+  }
+
+newRootTodo: String -> Int -> Todo
+newRootTodo str newId =
+  {
+      id = newId
+    , description = str
+    , completed = False
+    , childrenVisible = True
+    , children = (TodoChildren [])
+    , parentId = -1
   }
 
 toggleShowChildrenVisibleField : Model -> Int -> Model
@@ -101,9 +154,13 @@ createNewChildForTodo : Model -> Int -> Model
 createNewChildForTodo model todoId =
   {
     model 
-    | uid= model.uid + 1
+    | uid= incrementUid model.uid
     , entries = (addNewTodoToChildrenList model.entries todoId (model.uid) )
   }
+
+incrementUid : Int -> Int
+incrementUid uid =
+    uid + 1
   
 
 addNewTodoToChildrenList : TodoChildren -> Int -> Int -> TodoChildren
@@ -113,7 +170,7 @@ addNewTodoToChildrenList (TodoChildren todoChild) parentTodoId newTodoId =
       if todo.id == parentTodoId then 
         { 
           todo 
-          | children = addEmptyTodoChildToChildrenList todo.children newTodoId            
+          | children = addEmptyTodoChildToChildrenList todo.children newTodoId parentTodoId           
         } 
       else 
         recursiveAddNewTodoItem todo parentTodoId newTodoId
@@ -128,9 +185,9 @@ recursiveAddNewTodoItem todo parentTodoId newTodoId =
     | children = addNewTodoToChildrenList todo.children parentTodoId newTodoId
   }
 
-addEmptyTodoChildToChildrenList : TodoChildren -> Int -> TodoChildren
-addEmptyTodoChildToChildrenList (TodoChildren todo) newTodoId =
-  (TodoChildren (todo ++ [(newEntry "" newTodoId)]))
+addEmptyTodoChildToChildrenList : TodoChildren -> Int -> Int -> TodoChildren
+addEmptyTodoChildToChildrenList (TodoChildren todo) newTodoId parentTodoId=
+  (TodoChildren (todo ++ [(newEntry "" newTodoId parentTodoId)]))
 
 updateTodoModelDesc : Model -> Int -> String -> Model
 updateTodoModelDesc model id desc =
@@ -265,15 +322,7 @@ updateModelUniversalId model =
      model
      | uid = model.uid + 1    
    }
-
-getLastTodoFromList : TodoChildren -> Todo
-getLastTodoFromList (TodoChildren todolist) =
-  case List.head (List.reverse todolist) of
-    Nothing ->
-      (newEntry "" 1 )
-    Just val ->
-      val
-  
+ 
 
 addNewTodoItemToModel : Model -> Model
 addNewTodoItemToModel model =
@@ -287,4 +336,4 @@ addNewTodoItemToModel model =
 
 addToTodoChild : TodoChildren -> String -> Int -> TodoChildren
 addToTodoChild (TodoChildren todoChild) newTodoText newTodoVal =
-  (TodoChildren (todoChild ++ [(newEntry newTodoText newTodoVal)]))
+  (TodoChildren (todoChild ++ [(newRootTodo newTodoText newTodoVal)]))
