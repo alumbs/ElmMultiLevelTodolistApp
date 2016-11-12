@@ -6445,6 +6445,12 @@ return {
 
 }();
 
+var _elm_lang$dom$Dom$blur = _elm_lang$dom$Native_Dom.blur;
+var _elm_lang$dom$Dom$focus = _elm_lang$dom$Native_Dom.focus;
+var _elm_lang$dom$Dom$NotFound = function (a) {
+	return {ctor: 'NotFound', _0: a};
+};
+
 var _elm_lang$dom$Dom_LowLevel$onWindow = _elm_lang$dom$Native_Dom.onWindow;
 var _elm_lang$dom$Dom_LowLevel$onDocument = _elm_lang$dom$Native_Dom.onDocument;
 
@@ -9042,16 +9048,30 @@ var _user$project$Todo_State$update = F2(
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			case 'AddChildTodo':
-				var _p18 = _p17._0;
-				return _user$project$Todo_State$checkCtrlKeyDown(model.keysDown) ? {
-					ctor: '_Tuple2',
-					_0: A2(_user$project$Todo_State$createSiblingTodo, model, _p18.parentId),
-					_1: _elm_lang$core$Platform_Cmd$none
-				} : {
-					ctor: '_Tuple2',
-					_0: A2(_user$project$Todo_State$createNewChildForTodo, model, _p18.id),
-					_1: _elm_lang$core$Platform_Cmd$none
+				var _p20 = _p17._0;
+				var focus = _elm_lang$dom$Dom$focus(
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						'todo-',
+						_elm_lang$core$Basics$toString(model.uid)));
+				var addATodo = function (model) {
+					return _user$project$Todo_State$checkCtrlKeyDown(model.keysDown) ? A2(_user$project$Todo_State$createSiblingTodo, model, _p20.parentId) : A2(_user$project$Todo_State$createNewChildForTodo, model, _p20.id);
 				};
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					addATodo(model),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							A3(
+							_elm_lang$core$Task$perform,
+							function (_p18) {
+								return _user$project$Todo_Types$NoOp;
+							},
+							function (_p19) {
+								return _user$project$Todo_Types$NoOp;
+							},
+							focus)
+						]));
 			case 'DeleteTodo':
 				return {
 					ctor: '_Tuple2',
@@ -9248,7 +9268,6 @@ var _user$project$Todo_View$displaySingleTodo = function (todo) {
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_user$project$Todo_View$margin15Style,
 				_user$project$Todo_View$marginHalfemTopStyle,
 				A2(
 				_elm_lang$html$Html_Attributes$attribute,
@@ -9342,7 +9361,6 @@ var _user$project$Todo_View$displaySingleTodo = function (todo) {
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_user$project$Todo_View$margin15Style,
 						_elm_lang$html$Html_Attributes$class(
 						A2(
 							_elm_lang$core$String$append,

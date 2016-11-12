@@ -1,11 +1,10 @@
 module Todo.State exposing (init, update)
 
 import Todo.Types exposing (..)
--- import Todo.Key exposing (..)
 import String
 import Keyboard exposing (..)
--- import Set exposing (Set)
-
+import Dom
+import Task
 
 init : (Model, Cmd Msg)
 init =
@@ -36,12 +35,22 @@ update msg model =
     UpdateField str  ->
         { model | field = str } ! []
 
-    AddChildTodo todo ->     
-        if checkCtrlKeyDown model.keysDown then
-            --Create sibling todo
-            ((createSiblingTodo model todo.parentId), Cmd.none)
-        else
-            ((createNewChildForTodo model todo.id), Cmd.none)
+    AddChildTodo todo -> 
+        let
+            addATodo model =
+                if checkCtrlKeyDown model.keysDown then
+                    --Create sibling todo
+                    (createSiblingTodo model todo.parentId)
+                    -- ((createSiblingTodo model todo.parentId), Cmd.none)
+                else
+                    (createNewChildForTodo model todo.id)
+                    -- ((createNewChildForTodo model todo.id), Cmd.none)
+
+            focus =
+                Dom.focus ("todo-" ++ toString (model.uid))
+        in
+            addATodo model 
+            ! [ Task.perform (\_ -> NoOp) (\_ -> NoOp) focus ]
 
     DeleteTodo todoId ->
         ((deleteTodoFromModel model todoId), Cmd.none)

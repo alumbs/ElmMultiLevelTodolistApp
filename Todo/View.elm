@@ -60,8 +60,8 @@ displaySingleTodo todo =
   in
     div
     [
-      margin15Style 
-      , marginHalfemTopStyle
+    --   margin15Style 
+      marginHalfemTopStyle
       , attribute "id" (toString todo.id)
       , classList [("completed", todo.completed), ("todoParentContainer", True)]
     ]
@@ -115,8 +115,8 @@ displaySingleTodo todo =
       ] 
       , div 
         [ 
-          margin15Style
-          , class ( String.append "todoChildContainer " (showChildren todo.childrenVisible) )
+        --   margin15Style
+          class ( String.append "todoChildContainer " (showChildren todo.childrenVisible) )
         ] 
         [
           displayTodoList todo.children

@@ -6,6 +6,11 @@ div.todoParentContainer input
     font-family: Arial, Helvetica, sans-serif;
 }
 
+div.todoParentContainer
+{
+    margin-left: 30px;
+}
+
 div.todoParentContainer > div.todoChildContainer 
 {
     border-left: 2px groove #E2FAFF;
@@ -24,6 +29,7 @@ input[type=checkbox]
 div.completed > div.todoDetailsContainer > input.edit
 {
     text-decoration: line-through;
+    color: gray;
 }
 
 input.edit:focus
