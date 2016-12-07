@@ -20,6 +20,7 @@ type alias Model =
    , field: String
    , uid : Int
    , keysDown : List Keyboard.KeyCode
+   , selectedTodo : Todo
  }
 
 type Msg
@@ -33,3 +34,5 @@ type Msg
   | ToggleShowChildTodos TodoChildren Int
   | KeyDown KeyCode
   | KeyUp KeyCode
+  | ViewThisTodo Todo
+  | GotoHome

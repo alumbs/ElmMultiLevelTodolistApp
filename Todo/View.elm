@@ -34,6 +34,7 @@ showRootView str =
       ] 
       []
     , button [onClick Add] [text "Add New Todo"]
+    , button [margin15Style, onClick GotoHome] [text "Home"]
    ]
 
 --Display a list of todos
@@ -76,7 +77,14 @@ displaySingleTodo todo =
         [
           button
           [
-            onClick (ToggleShowChildTodos todo.children todo.id)
+            onClick (ViewThisTodo todo)
+            , title "View Todo"
+          ]
+          [ text "View"]
+          , button
+          [
+            margin15Style
+            , onClick (ToggleShowChildTodos todo.children todo.id)
             , title "Minimize"
           ]
           [
@@ -155,13 +163,26 @@ displayFooter =
 
    ]
 
+displaySelectedTodo : Todo -> Html Msg
+displaySelectedTodo todoToDisplay =
+  displaySingleTodo todoToDisplay
+
+showTodoOrHome : Todo -> TodoChildren -> Html Msg
+showTodoOrHome singleTodo todoList =
+  case singleTodo.id of
+    -1 ->
+      displayTodoList todoList
+    _ ->
+      displaySelectedTodo singleTodo
+
 -- VIEW
 view : Model -> Html Msg
 view model =
     div []
      [ 
        showRootView model.field
-       , displayTodoList model.entries
+       , showTodoOrHome model.selectedTodo model.entries
+       --, displayTodoList model.entries
        , displayFooter
      ]
 

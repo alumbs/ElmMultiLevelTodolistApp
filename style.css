@@ -41,7 +41,7 @@ input.edit:focus
 div.todoDetailsContainer > input.edit {
     display: inline-block;
     min-height: 16px;
-    width: 80%;
+    width: 75%;
     padding: 5px;
     margin: 0 0 0 15px;
     border: 0;

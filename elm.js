@@ -8708,12 +8708,16 @@ var _user$project$Todo_Types$Todo = F6(
 	function (a, b, c, d, e, f) {
 		return {id: a, description: b, completed: c, childrenVisible: d, children: e, parentId: f};
 	});
-var _user$project$Todo_Types$Model = F4(
-	function (a, b, c, d) {
-		return {entries: a, field: b, uid: c, keysDown: d};
+var _user$project$Todo_Types$Model = F5(
+	function (a, b, c, d, e) {
+		return {entries: a, field: b, uid: c, keysDown: d, selectedTodo: e};
 	});
 var _user$project$Todo_Types$TodoChildren = function (a) {
 	return {ctor: 'TodoChildren', _0: a};
+};
+var _user$project$Todo_Types$GotoHome = {ctor: 'GotoHome'};
+var _user$project$Todo_Types$ViewThisTodo = function (a) {
+	return {ctor: 'ViewThisTodo', _0: a};
 };
 var _user$project$Todo_Types$KeyUp = function (a) {
 	return {ctor: 'KeyUp', _0: a};
@@ -9108,13 +9112,31 @@ var _user$project$Todo_State$update = F2(
 						}),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
-			default:
+			case 'KeyUp':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
 						model,
 						{
 							keysDown: A2(_user$project$Todo_State$removeKey, _p17._0, model.keysDown)
+						}),
+					_elm_lang$core$Native_List.fromArray(
+						[]));
+			case 'ViewThisTodo':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{selectedTodo: _p17._0}),
+					_elm_lang$core$Native_List.fromArray(
+						[]));
+			default:
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							selectedTodo: A3(_user$project$Todo_State$newEntry, '', -1, -1)
 						}),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
@@ -9129,7 +9151,8 @@ var _user$project$Todo_State$emptyModel = {
 	field: '',
 	uid: 1,
 	keysDown: _elm_lang$core$Native_List.fromArray(
-		[])
+		[]),
+	selectedTodo: A3(_user$project$Todo_State$newEntry, '', -1, -1)
 };
 var _user$project$Todo_State$init = {ctor: '_Tuple2', _0: _user$project$Todo_State$emptyModel, _1: _elm_lang$core$Platform_Cmd$none};
 
@@ -9254,6 +9277,17 @@ var _user$project$Todo_View$showRootView = function (str) {
 				_elm_lang$core$Native_List.fromArray(
 					[
 						_elm_lang$html$Html$text('Add New Todo')
+					])),
+				A2(
+				_elm_lang$html$Html$button,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_user$project$Todo_View$margin15Style,
+						_elm_lang$html$Html_Events$onClick(_user$project$Todo_Types$GotoHome)
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text('Home')
 					]))
 			]));
 };
@@ -9302,6 +9336,19 @@ var _user$project$Todo_View$displaySingleTodo = function (todo) {
 								_elm_lang$html$Html$button,
 								_elm_lang$core$Native_List.fromArray(
 									[
+										_elm_lang$html$Html_Events$onClick(
+										_user$project$Todo_Types$ViewThisTodo(todo)),
+										_elm_lang$html$Html_Attributes$title('View Todo')
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html$text('View')
+									])),
+								A2(
+								_elm_lang$html$Html$button,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_user$project$Todo_View$margin15Style,
 										_elm_lang$html$Html_Events$onClick(
 										A2(_user$project$Todo_Types$ToggleShowChildTodos, todo.children, todo.id)),
 										_elm_lang$html$Html_Attributes$title('Minimize')
@@ -9381,6 +9428,18 @@ var _user$project$Todo_View$displayTodoList = function (_p0) {
 			[]),
 		A2(_elm_lang$core$List$map, _user$project$Todo_View$displaySingleTodo, _p1._0));
 };
+var _user$project$Todo_View$displaySelectedTodo = function (todoToDisplay) {
+	return _user$project$Todo_View$displaySingleTodo(todoToDisplay);
+};
+var _user$project$Todo_View$showTodoOrHome = F2(
+	function (singleTodo, todoList) {
+		var _p2 = singleTodo.id;
+		if (_p2 === -1) {
+			return _user$project$Todo_View$displayTodoList(todoList);
+		} else {
+			return _user$project$Todo_View$displaySelectedTodo(singleTodo);
+		}
+	});
 var _user$project$Todo_View$view = function (model) {
 	return A2(
 		_elm_lang$html$Html$div,
@@ -9389,7 +9448,7 @@ var _user$project$Todo_View$view = function (model) {
 		_elm_lang$core$Native_List.fromArray(
 			[
 				_user$project$Todo_View$showRootView(model.field),
-				_user$project$Todo_View$displayTodoList(model.entries),
+				A2(_user$project$Todo_View$showTodoOrHome, model.selectedTodo, model.entries),
 				_user$project$Todo_View$displayFooter
 			]));
 };
