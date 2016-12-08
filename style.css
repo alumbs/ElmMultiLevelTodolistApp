@@ -8,7 +8,8 @@ div.todoParentContainer input
 
 div.todoParentContainer
 {
-    margin-left: 30px;
+    /*margin-left: 30px;*/
+    margin-left: 0;
 }
 
 div.todoParentContainer > div.todoChildContainer 
@@ -51,10 +52,29 @@ div.todoDetailsContainer > input.edit {
     display: none;
 }*/
 
-div.hideChildren
+div.hideChildren,
+div.todoDetailsContainer
 {
     display: none;
 }
+
+/*Show the selected todo*/
+div.todoDetailsContainer.showTodoDetailsContainer,
+div.todoParentContainer.showTodoParentContainer div.todoDetailsContainer{
+    display: block;
+}
+
+div.todoParentContainer.showTodoParentContainer,
+div.todoParentContainer.showTodoParentContainer div.todoParentContainer,
+div.todoParentContainer.showAllTodos{
+    margin-left: 30px;
+}
+
+div.todoParentContainer.showAllTodos,
+div.todoParentContainer.showAllTodos div.todoDetailsContainer{
+    display: block;
+}
+/*END: Show the selected todo*/
 
 div.todoDetailsContainer
 {

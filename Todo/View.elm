@@ -38,14 +38,18 @@ showRootView str =
    ]
 
 --Display a list of todos
-displayTodoList : TodoChildren -> Html Msg
-displayTodoList (TodoChildren todoList) =
-  div[]
-  (List.map displaySingleTodo todoList)
+displayTodoList : TodoChildren -> Int -> Html Msg
+displayTodoList (TodoChildren todoList) showTodoId =
+  let
+    showThisTodo todo =
+      displaySingleTodo todo showTodoId
+  in
+    div[]
+    (List.map showThisTodo todoList)
 
 --Display single todo
-displaySingleTodo : Todo -> Html Msg
-displaySingleTodo todo =
+displaySingleTodo : Todo -> Int -> Html Msg
+displaySingleTodo todo showTodoId =
   let
     showChildren areChildrenVisible =
       if areChildrenVisible then
@@ -58,18 +62,40 @@ displaySingleTodo todo =
           "-"
        else
           "+"
+
+    showThisTodo thisTodoId showTodoId =
+      if thisTodoId == showTodoId then
+        True
+      else
+        False
+
+    showAllTodos showTodoId =
+      if showTodoId == -1 then
+        True
+      else
+        False
   in
     div
     [
     --   margin15Style 
       marginHalfemTopStyle
       , attribute "id" (toString todo.id)
-      , classList [("completed", todo.completed), ("todoParentContainer", True)]
+      , classList 
+        [
+          ("completed", todo.completed)
+          , ("todoParentContainer", True)
+          , ("showTodoParentContainer", showThisTodo todo.id showTodoId)
+          , ("showAllTodos", showAllTodos showTodoId) 
+        ]
     ]
     [ 
       div
       [ 
-        class "todoDetailsContainer"
+        classList 
+        [
+          ("todoDetailsContainer", True)
+          , ("showTodoDetailsContainer", showThisTodo todo.id showTodoId)
+        ]
       ]
       [
         div
@@ -77,7 +103,7 @@ displaySingleTodo todo =
         [
           button
           [
-            onClick (ViewThisTodo todo)
+            onClick (ViewThisTodo todo.id)
             , title "View Todo"
           ]
           [ text "View"]
@@ -127,7 +153,7 @@ displaySingleTodo todo =
           class ( String.append "todoChildContainer " (showChildren todo.childrenVisible) )
         ] 
         [
-          displayTodoList todo.children
+          displayTodoList todo.children showTodoId
         ]
     ]
 
@@ -163,17 +189,18 @@ displayFooter =
 
    ]
 
-displaySelectedTodo : Todo -> Html Msg
-displaySelectedTodo todoToDisplay =
-  displaySingleTodo todoToDisplay
+-- displaySelectedTodo : Todo -> Html Msg
+-- displaySelectedTodo todoToDisplay =
+--   displaySingleTodo todoToDisplay
 
-showTodoOrHome : Todo -> TodoChildren -> Html Msg
-showTodoOrHome singleTodo todoList =
-  case singleTodo.id of
-    -1 ->
-      displayTodoList todoList
-    _ ->
-      displaySelectedTodo singleTodo
+showTodoOrHome : Int -> TodoChildren -> Html Msg
+showTodoOrHome singleTodoId todoList =
+  displayTodoList todoList singleTodoId
+  -- case singleTodo.id of
+  --   -1 ->
+  --     displayTodoList todoList
+  --   _ ->
+  --     displaySelectedTodo singleTodo
 
 -- VIEW
 view : Model -> Html Msg
@@ -181,7 +208,7 @@ view model =
     div []
      [ 
        showRootView model.field
-       , showTodoOrHome model.selectedTodo model.entries
+       , showTodoOrHome model.selectedTodoId model.entries
        --, displayTodoList model.entries
        , displayFooter
      ]

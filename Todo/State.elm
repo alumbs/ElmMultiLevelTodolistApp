@@ -18,7 +18,7 @@ emptyModel =
    , field = ""
    , uid = 1
    , keysDown = []
-   , selectedTodo = (newEntry "" -1 -1)
+   , selectedTodoId = -1 --(newEntry "" -1 -1)
  }
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -71,11 +71,11 @@ update msg model =
     KeyUp key ->
         {model | keysDown = removeKey key model.keysDown} ! []
 
-    ViewThisTodo todo ->
-        {model | selectedTodo = todo} ! []
+    ViewThisTodo todoId ->
+        {model | selectedTodoId = todoId} ! []
 
     GotoHome ->
-        {model | selectedTodo = (newEntry "" -1 -1)} ! []
+        {model | selectedTodoId = -1} ! []
 
 
 createSiblingTodo : Model -> Int -> Model
