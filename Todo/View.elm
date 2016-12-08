@@ -189,18 +189,9 @@ displayFooter =
 
    ]
 
--- displaySelectedTodo : Todo -> Html Msg
--- displaySelectedTodo todoToDisplay =
---   displaySingleTodo todoToDisplay
-
 showTodoOrHome : Int -> TodoChildren -> Html Msg
 showTodoOrHome singleTodoId todoList =
   displayTodoList todoList singleTodoId
-  -- case singleTodo.id of
-  --   -1 ->
-  --     displayTodoList todoList
-  --   _ ->
-  --     displaySelectedTodo singleTodo
 
 -- VIEW
 view : Model -> Html Msg
@@ -209,7 +200,6 @@ view model =
      [ 
        showRootView model.field
        , showTodoOrHome model.selectedTodoId model.entries
-       --, displayTodoList model.entries
        , displayFooter
      ]
 
