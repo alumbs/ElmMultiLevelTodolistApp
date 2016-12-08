@@ -9223,72 +9223,79 @@ var _user$project$Todo_View$onEnter = function (msg) {
 		'keydown',
 		A2(_elm_lang$core$Json_Decode$map, tagger, _elm_lang$html$Html_Events$keyCode));
 };
-var _user$project$Todo_View$showRootView = function (str) {
-	return A2(
-		_elm_lang$html$Html$div,
-		_elm_lang$core$Native_List.fromArray(
-			[_user$project$Todo_View$margin1emBotStyle]),
-		_elm_lang$core$Native_List.fromArray(
-			[
-				A2(
-				_elm_lang$html$Html$h1,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text('Welcome to Todolist')
-					])),
-				A2(
-				_elm_lang$html$Html$h2,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text('Below are the list of todos')
-					])),
-				A2(
-				_elm_lang$html$Html$div,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text(str)
-					])),
-				A2(
-				_elm_lang$html$Html$input,
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html_Attributes$placeholder('Enter the name of a new Todo'),
-						_elm_lang$html$Html_Attributes$value(str),
-						_elm_lang$html$Html_Attributes$autofocus(true),
-						_elm_lang$html$Html_Events$onInput(_user$project$Todo_Types$UpdateField),
-						_user$project$Todo_View$onEnter(_user$project$Todo_Types$Add)
-					]),
-				_elm_lang$core$Native_List.fromArray(
-					[])),
-				A2(
-				_elm_lang$html$Html$button,
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html_Events$onClick(_user$project$Todo_Types$Add)
-					]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text('Add New Todo')
-					])),
-				A2(
-				_elm_lang$html$Html$button,
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_user$project$Todo_View$margin15Style,
-						_elm_lang$html$Html_Events$onClick(_user$project$Todo_Types$GotoHome)
-					]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text('Home')
-					]))
-			]));
-};
+var _user$project$Todo_View$showRootView = F2(
+	function (str, selectedTodoId) {
+		var isSpecificTodoSelected = (!_elm_lang$core$Native_Utils.eq(selectedTodoId, -1)) ? true : false;
+		return A2(
+			_elm_lang$html$Html$div,
+			_elm_lang$core$Native_List.fromArray(
+				[_user$project$Todo_View$margin1emBotStyle]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					A2(
+					_elm_lang$html$Html$h1,
+					_elm_lang$core$Native_List.fromArray(
+						[]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html$text('Welcome to Todolist')
+						])),
+					A2(
+					_elm_lang$html$Html$h2,
+					_elm_lang$core$Native_List.fromArray(
+						[]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html$text('Below are the list of todos')
+						])),
+					A2(
+					_elm_lang$html$Html$div,
+					_elm_lang$core$Native_List.fromArray(
+						[]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html$text(str)
+						])),
+					A2(
+					_elm_lang$html$Html$input,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html_Attributes$placeholder('Enter the name of a new Todo'),
+							_elm_lang$html$Html_Attributes$value(str),
+							_elm_lang$html$Html_Attributes$autofocus(true),
+							_elm_lang$html$Html_Events$onInput(_user$project$Todo_Types$UpdateField),
+							_user$project$Todo_View$onEnter(_user$project$Todo_Types$Add)
+						]),
+					_elm_lang$core$Native_List.fromArray(
+						[])),
+					A2(
+					_elm_lang$html$Html$button,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html_Events$onClick(_user$project$Todo_Types$Add)
+						]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html$text('Add New Todo')
+						])),
+					A2(
+					_elm_lang$html$Html$button,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_user$project$Todo_View$margin15Style,
+							_elm_lang$html$Html_Events$onClick(_user$project$Todo_Types$GotoHome),
+							_elm_lang$html$Html_Attributes$classList(
+							_elm_lang$core$Native_List.fromArray(
+								[
+									{ctor: '_Tuple2', _0: 'specificTodoSelected', _1: isSpecificTodoSelected}
+								]))
+						]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html$text('Home')
+						]))
+				]));
+	});
 var _user$project$Todo_View$displaySingleTodo = F2(
 	function (todo, showTodoId) {
 		var showAllTodos = function (showTodoId) {
@@ -9468,7 +9475,7 @@ var _user$project$Todo_View$view = function (model) {
 			[]),
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_user$project$Todo_View$showRootView(model.field),
+				A2(_user$project$Todo_View$showRootView, model.field, model.selectedTodoId),
 				A2(_user$project$Todo_View$showTodoOrHome, model.selectedTodoId, model.entries),
 				_user$project$Todo_View$displayFooter
 			]));

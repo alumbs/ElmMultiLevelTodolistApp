@@ -76,6 +76,12 @@ div.todoParentContainer.showAllTodos div.todoDetailsContainer{
 }
 /*END: Show the selected todo*/
 
+/*Highlight button when a specific todo is selected */
+button.specificTodoSelected{
+    background-color: #4dc3ff;
+}
+/*END: Highlight button when a specific todo is selected */
+
 div.todoDetailsContainer
 {
     overflow: hidden;

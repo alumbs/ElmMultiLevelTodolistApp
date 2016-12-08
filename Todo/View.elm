@@ -17,25 +17,43 @@ onEnter msg =
     on "keydown" (Json.map tagger keyCode)
 
 --show the root view
-showRootView : String -> Html Msg
-showRootView str = 
-   div[margin1emBotStyle]
-   [
-      h1 [] [ text "Welcome to Todolist" ]
-    , h2 [] [ text "Below are the list of todos" ]
-    , div [] [text str]
-    , input 
-      [
-        placeholder "Enter the name of a new Todo"
-      , value str
-      , autofocus True
-      , onInput UpdateField
-      , onEnter Add
-      ] 
-      []
-    , button [onClick Add] [text "Add New Todo"]
-    , button [margin15Style, onClick GotoHome] [text "Home"]
-   ]
+showRootView : String -> Int -> Html Msg
+showRootView str selectedTodoId= 
+  let
+    isSpecificTodoSelected =
+      if selectedTodoId /= -1 then
+        True
+      else
+        False
+  in
+    div[margin1emBotStyle]
+    [
+        h1 [] [ text "Welcome to Todolist" ]
+      , h2 [] [ text "Below are the list of todos" ]
+      , div [] [text str]
+      , input 
+        [
+          placeholder "Enter the name of a new Todo"
+        , value str
+        , autofocus True
+        , onInput UpdateField
+        , onEnter Add
+        ] 
+        []
+      , button [onClick Add] [text "Add New Todo"]
+      , button 
+        [
+          margin15Style
+          , onClick GotoHome
+          , classList
+            [
+              ("specificTodoSelected", isSpecificTodoSelected)
+            ] 
+        ] 
+        [
+          text "Home"
+        ]
+    ]
 
 --Display a list of todos
 displayTodoList : TodoChildren -> Int -> Html Msg
@@ -198,7 +216,7 @@ view : Model -> Html Msg
 view model =
     div []
      [ 
-       showRootView model.field
+       showRootView model.field model.selectedTodoId
        , showTodoOrHome model.selectedTodoId model.entries
        , displayFooter
      ]
