@@ -27,19 +27,20 @@ input[type=checkbox]
 }
 
 /*div.completed > div.todoDetailsContainer > div.view > label*/
-div.completed > div.todoDetailsContainer > input.edit
+div.completed > div.todoDetailsContainer > .edit,
+div.completed > div.todoDetailsContainer > .edit > span
 {
     text-decoration: line-through;
     color: gray;
 }
 
-input.edit:focus
+.edit:focus
 {
     outline: none;
 }
 
 /*div.editing .edit {*/
-div.todoDetailsContainer > input.edit {
+div.todoDetailsContainer > .edit {
     display: inline-block;
     min-height: 16px;
     width: 75%;

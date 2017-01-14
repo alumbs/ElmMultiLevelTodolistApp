@@ -9417,7 +9417,7 @@ var _user$project$Todo_View$displaySingleTodo = F2(
 										[]))
 								])),
 							A2(
-							_elm_lang$html$Html$input,
+							_elm_lang$html$Html$div,
 							_elm_lang$core$Native_List.fromArray(
 								[
 									_elm_lang$html$Html_Attributes$class('edit'),
@@ -9431,7 +9431,8 @@ var _user$project$Todo_View$displaySingleTodo = F2(
 									_user$project$Todo_Types$AddChildTodo(todo)),
 									_elm_lang$html$Html_Events$onInput(
 									_user$project$Todo_Types$UpdateTodo(todo.id)),
-									_elm_lang$html$Html_Attributes$value(todo.description)
+									_elm_lang$html$Html_Attributes$value(todo.description),
+									_elm_lang$html$Html_Attributes$contenteditable(true)
 								]),
 							_elm_lang$core$Native_List.fromArray(
 								[]))

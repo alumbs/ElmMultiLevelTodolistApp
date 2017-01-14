@@ -152,7 +152,7 @@ displaySingleTodo todo showTodoId =
             ]
             [] 
         ]
-        , input
+        , div
           [
             -- myStyle          
             class "edit"
@@ -162,6 +162,7 @@ displaySingleTodo todo showTodoId =
             , onEnter (AddChildTodo todo)
             , onInput (UpdateTodo todo.id)
             , value todo.description
+            , contenteditable True
           ]
           [] 
       ] 
