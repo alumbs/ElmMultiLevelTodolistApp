@@ -156,7 +156,7 @@ displaySingleTodo todo showTodoId =
           [
             -- myStyle          
             class "edit"
-            , placeholder "New todo"
+            -- , placeholder "New todo"
             , id ("todo-" ++ toString todo.id)
             -- , onCtrlEnter (AddSiblingTodo todo.id)
             , onEnter (AddChildTodo todo)
@@ -164,7 +164,9 @@ displaySingleTodo todo showTodoId =
             , value todo.description
             , contenteditable True
           ]
-          [] 
+          [
+            text todo.description
+          ] 
       ] 
       , div 
         [ 

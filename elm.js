@@ -9421,7 +9421,6 @@ var _user$project$Todo_View$displaySingleTodo = F2(
 							_elm_lang$core$Native_List.fromArray(
 								[
 									_elm_lang$html$Html_Attributes$class('edit'),
-									_elm_lang$html$Html_Attributes$placeholder('New todo'),
 									_elm_lang$html$Html_Attributes$id(
 									A2(
 										_elm_lang$core$Basics_ops['++'],
@@ -9435,7 +9434,9 @@ var _user$project$Todo_View$displaySingleTodo = F2(
 									_elm_lang$html$Html_Attributes$contenteditable(true)
 								]),
 							_elm_lang$core$Native_List.fromArray(
-								[]))
+								[
+									_elm_lang$html$Html$text(todo.description)
+								]))
 						])),
 					A2(
 					_elm_lang$html$Html$div,
